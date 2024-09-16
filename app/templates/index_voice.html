@@ -1,0 +1,342 @@
+{% extends "layout_voice.html" %}
+
+{% block body %}
+
+<!-- {% if error %}<p class="error"><strong>Hey: </strong> {{ error }}{% endif %} -->
+
+<!-- responsive web design tag to adjust for all devices -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<div style=background-color:white class=container_search>
+
+<form name="Go" action = "{{ url_for('cluster_voice') }}" method="POST" enctype="multipart/form-data" id="usrform">
+
+<dl>
+<dt>
+<!-- change input to value="{{ query }}" for non-voice -->
+<input type="text" name="query" id="query" value="{{ query }}" autofocus data-intro='Input your search term here.'/>
+<!-- speech recognition -->
+<script>
+		// ask for microphone permission
+		if (!('webkitSpeechRecognition' in window)) {
+		upgrade();
+		} else {
+				// tell the user about PATTIE
+				var ls = localStorage.getItem('namespace.visited');
+				if (ls == null) {
+						alert('Welcome to PATTIE.\n\nTo use PATTIE with your voice, see our "About" page for a quick overview on the commands.');
+						localStorage.setItem('namespace.visited', 1)
+				}
+				var recognition = new webkitSpeechRecognition();
+				// have PATTIE always listening
+				recognition.continuous = true;
+				// extract transcript object as query
+				recognition.onresult = function(event) {
+					console.log(event)
+					var transcript = event.results[0][0].transcript
+					console.log('Query: ' + transcript)
+					// do not execute until PATTIE command is given
+					if (transcript.includes('search')) {
+						// use voice query as input text
+						document.getElementById("query").value = transcript.replace('search', '');
+						// use name of <form> tag to automatically submit for clustering
+						document.Go.submit();
+					} else {
+							for (recording in event.results) {
+								console.log(event.results[recording])
+								var transcript = event.results[recording][0].transcript;
+								console.log('Query: ' + transcript)
+								if (transcript.includes('search')) {
+									document.getElementById("query").value = transcript.replace('search', '');
+									document.Go.submit();
+								}
+							}
+						}
+				}
+			recognition.start();
+			recognition.onend = function() {
+				recognition.start();
+			}
+		}
+</script>
+</dt>
+<dt>
+<dt>
+<!-- <div class = 'select'> -->
+		<select style=text-align:center;color:white;background-color:white;opacity:0.0 name="dataset_opt" id='dataset_opt' onChange='changeField(this.value)' data-intro='- Select your dataset here. <dt>
+																																															- Note that you may upload your own dataset                                                                                    by selecting "upload".'>
+				<option value="PubMedAPI"></option>
+				<!-- <option value="GoogleAPI3">Basic Sciences</option>
+				<option value="GoogleAPI">Computer & Information Sciences</option>
+				<option value="GoogleAPI2">Government & Academia</option>
+				<option value="NewsAPI">News</option> -->
+		</select>
+		<!-- <div class="select__arrow"></div> -->
+<!-- </div> -->
+
+<!-- <div class="select">
+<select style=color:white;background-color:grey;opacity:.30 name="num_cls" id="num_cls" data-intro='You can also specify the number of clusters you want to see!'>
+<option>Optional: # of clusters</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
+<option>9</option>
+<option>10</option>
+</select>
+<div class="select__arrow"></div>
+</div> -->
+
+<!-- <dt>
+<div id='date_div' style ="opacity:0.35; font-size:16px; margin-bottom:15px; text-align: center;">
+</div>
+</dt> -->
+
+<div>
+<input id='Explore' style=background:DodgerBlue;color:white;opacity:.70 type=submit value="Search" data-intro='Now search and see the clusters!'>
+</div>
+
+<div class = 'select'>
+		<select name="field" id='field' data-intro='Then specify your field.' style="visibility:hidden">
+				<option value="All fields" defaultOpen>All fields</option>
+		</select>
+		<!--<div class="select__arrow"></div>-->
+</div> <!-- closing select-->
+
+<!--
+<div style='margin-top:30px'>
+<a>First time using Pattie? You might be interested in:</a>
+<a href=# class='text_link' onclick="introJs().start()">1. A Step-by-Step Intro</a>
+<a>or</a>
+<a href='https://youtu.be/wO4uPzWZGqU' onclick="return !window.open(this.href, 'tutorial', 'width=800,height=600')" target="_blank">2. A Video Tutorial</a>
+</div>
+-->
+<div>
+
+
+ <input type="file" id="inputfile" name="inputfile" style="visibility:hidden">
+ <button type="button" onclick="redirectUpload()" id="upload" class="btn" style="visibility:hidden"></button>
+</div>
+
+<dl>
+
+<script type=text/javascript>
+	document.getElementById("main_heading").style="margin-top:10%"
+
+// $('#inputfile').trigger('click')
+//build dataset selecting menu
+var uploaded_files = {{uploaded_files|safe}}
+//console.log(uploaded_files)
+$(document).ready(function() {
+
+	console.log(document.URL);
+
+	//document.getElementById("tutorial").innerHTML= "<a href='{{url_for('static', filename='PATTIE_instrucitons.html')}}' class='text_link' onclick=\"return !window.open(this.href, 'tutorial', 'width=800,height=600')\" target=\"_blank\" style='text-align:left;margin-left:-1200px'>About</a>";
+
+	//var opt_check = 0;
+	//for ( var i = 0 ; i < uploaded_files.length ; i++) {
+	//    createOption_dataset(uploaded_files[i]);
+			//console.log("file i = " + uploaded_files[i])
+	//    if (uploaded_files[i]=="Voicearch_utf8"){
+	//        opt_check = 1;
+	//    }
+	//}
+	var cur_value = document.getElementById("dataset_opt").value;
+	//console.log(cur_value)
+	changeField(cur_value);
+
+	//change the default value of options according to the previous page
+	var prev_page = document.referrer;
+	if (prev_page.indexOf("voicearch") >=0){
+		//console.log("that's what we want")
+		if (opt_check == 1){
+			document.getElementById("dataset_opt").value = "Voicearch_utf8"
+		}
+		//console.log(opt_check)
+	}
+
+});
+
+function redirectUpload(){
+	window.location.href = document.URL + "upload";
+}
+
+function changeField(value){
+
+
+		if (value == "PLOS"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+			createOption_field('Title');
+			createOption_field('Abstract');
+			createOption_field('Body');
+
+		}else if (value == "Upload..."){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+			createOption_field('Title');
+			createOption_field('Body');
+
+			$('#upload').click();
+
+		}else if (value == "NYTIMES"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+			createOption_field('Title');
+			createOption_field('Body');
+
+		}else if (value == "DIABETES"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+			createOption_field('Title');
+			createOption_field('Abstract');
+
+		}else if (value == "PubMedAPI"){
+
+			var note_div = document.createElement("div");
+			//note_div.setAttribute("id", "note_div");
+			//note_div.setAttribute("style", "text-align: left; padding-left:27.6%; font-size: 14px; font-style:italic;");
+			//document.getElementById('date_div').appendChild(note_div);
+			//document.getElementById('note_div').innerHTML='Source: PubMed';
+			createOption_field('All fields');
+
+		}else if (value == "GoogleAPI"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			var note_div = document.createElement("div");
+			note_div.setAttribute("id", "note_div");
+			note_div.setAttribute("style", "text-align: left; padding-left:27.6%; font-size: 14px; font-style:italic;");
+			document.getElementById('date_div').appendChild(note_div);
+			document.getElementById('note_div').innerHTML='Sources: ACM Digital Library, ASIS&T Digital Library, IEEE Xplore';
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+
+		}else if (value == "GoogleAPI2"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			var note_div = document.createElement("div");
+			note_div.setAttribute("id", "note_div");
+			note_div.setAttribute("style", "text-align: left; padding-left:27.6%; font-size: 14px; font-style:italic;");
+			document.getElementById('date_div').appendChild(note_div);
+			document.getElementById('note_div').innerHTML='Sources: all domains with .gov or .edu';
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+
+		}else if (value == "GoogleAPI3"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			var note_div = document.createElement("div");
+			note_div.setAttribute("id", "note_div");
+			note_div.setAttribute("style", "text-align: left; padding-left:27.6%; font-size: 14px; font-style:italic;");
+			document.getElementById('date_div').appendChild(note_div);
+			document.getElementById('note_div').innerHTML='Sources: Nature, Science, Cell, PNAS';
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+
+		}else if (value == "GoogleAPI4"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			var note_div = document.createElement("div");
+			note_div.setAttribute("id", "note_div");
+			note_div.setAttribute("style", "text-align: left; padding-left:27.6%; font-size: 14px; font-style:italic;");
+			document.getElementById('date_div').appendChild(note_div);
+			document.getElementById('note_div').innerHTML='Source: PubMed Central';
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+
+
+
+
+		}else if (value == "NewsAPI"){
+
+			document.getElementById('date_div').innerHTML = ''
+
+			document.getElementById('date_div').innerHTML+='Start Date: ';
+
+			var x = document.createElement("INPUT");
+			x.setAttribute("type", "date");
+			x.setAttribute("name", "start_date");
+			x.setAttribute("id", "start_date");
+			x.setAttribute("value", '{{start_date}}');
+			x.setAttribute("style", "opacity:0.75;background:DodgerBlue");
+			document.getElementById('date_div').appendChild(x);
+
+			var dt = document.createElement("dt");
+			//document.getElementById('date_div').appendChild(dt);
+
+			document.getElementById('date_div').innerHTML+='\nEnd Date: ';
+
+			var x = document.createElement("INPUT");
+			x.setAttribute("type", "date");
+			x.setAttribute("name", "end_date");
+			x.setAttribute("id", "end_date");
+			x.setAttribute("value", '{{end_date}}');
+			x.setAttribute("style", "opacity:0.9;background:DodgerBlue");
+			document.getElementById('date_div').appendChild(x);
+
+			document.getElementById('date_div').appendChild(dt);
+
+			var note_div = document.createElement("div");
+			note_div.setAttribute("id", "note_div");
+			note_div.setAttribute("style", "text-align: left; padding-left:27.6%; font-size: 14px; font-style:italic;");
+			document.getElementById('date_div').appendChild(note_div);
+			document.getElementById('note_div').innerHTML='Note:<dt>Please set your start date <dt>no earlier than 30 days from today. <dt>If you do not enter a search, the <dt>top 100 trending news from the last <dt>15 minutes will be retrieved.';
+
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+
+		}else{
+
+			document.getElementById('date_div').innerHTML = ''
+
+			document.getElementById('field').innerHTML = '';
+			createOption_field('All fields');
+		}
+	}
+
+	function createOption_field(value) {
+		el = document.createElement('option');
+		el.value = value;
+		el.innerHTML = value;
+		el.id = value;
+		document.getElementById('field').appendChild(el);
+	}
+
+	function createOption_dataset(value) {
+		el = document.createElement('option');
+		el.value = value;
+		el.innerHTML = value;
+		el.id = value;
+		document.getElementById('dataset_opt').appendChild(el);
+	}
+
+
+	</script>
+
+
+
+</form>
+
+</div> <!-- closing container_search -->
+
+
+{% endblock %}

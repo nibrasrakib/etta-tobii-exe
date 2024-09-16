@@ -1,0 +1,66 @@
+{% block content %} {% block styles %}
+<link rel="stylesheet" href="{{url_for('.static', filename='login.css')}}" />
+<link rel=stylesheet type=text/css href="{{ url_for('static',
+filename='bootstrap.min.css') }}"> {% endblock %}
+
+<div style="color: grey;height: 10px" class="menu" id="menu">
+  <a href="." id="home_link" class="text_link" style="padding-left: 15px"
+    >Home</a
+  >
+</div>
+<h1 class="form-signin-heading" >Sign In</h1>
+<form class="form-signin" action="" method="post" novalidate>
+  {{ form.hidden_tag() }}
+  <p>
+    {{ form.username.label }}<br />
+    {{ form.username(size=25) }}<br />
+    {% for error in form.username.errors %}
+    <span style="color: red">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <p>
+    {{ form.password.label }}<br />
+    {{ form.password(size=25) }}<br />
+    {% for error in form.password.errors %}
+    <span style="color: red">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+  <div class="buttons" style="display: inline; float: left">
+    <p>{{ form.submit() }}</p>
+    <p style="text-align: center">
+	New User? <a href="{{url_for('register')}}?target={{encoded_target}}">Click to Register!</a>
+    </p>
+  </div>
+</form>
+<a
+  style="display: inline-block; margin-left: -105px;text-decoration: none;"
+  href="https://pattie.unc.edu/Shibboleth.sso/Login"
+  id="submit"
+  class="onyen-signin"
+  ><img style="height: 27px; margin-top:-3px" src="static/old_well.png" /> Sign In with Onyen</a
+>
+{% endblock %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<script>
+    var message = {{message|tojson}}
+    alert(message)
+</script>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<script type=text/javascript>
+	/* get the target url to return to */
+	const encodedTarget = {{encoded_target|tojson}}
+	const loginHandlerUrl = {{url_for('onyen_login_handler')|tojson}}
+	/* double level of encoding is needed for browser to correctly do redirection */
+	const encodedOnyenSignInUrl = encodeURIComponent(loginHandlerUrl + "?target=" + encodedTarget)
+	document.getElementsByClassName("onyen-signin")[0].href = "https://pattie.unc.edu/Shibboleth.sso/Login?target=" +  encodedOnyenSignInUrl;
+
+</script>
+
+

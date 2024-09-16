@@ -1,0 +1,8 @@
+Reason: when searching on gene keywords, the articles we've seen aren't so related to the gene names, i.e. there's little appearnce of the cluster gene names in the articles' titles or abstracts
+Solution: To validify whether the clusters have the "right" articles, i.e. articles highly related to the cluster labels, I wrote a function to compute the coverage rate
+Code: "genes_coverage()" function in visual_library_plos.py, it's called on line 777 in app/routes.py 
+Observations:
+1. The coverage is low for gene search, with half of them zero coverage rate, the other half ranging from 10%~30%.
+2. The cluster labels appearing in the articles are highly homogeneous. For example, if search covid, most articles mention "ACE2"; just a little portion of articles mention other genes.
+3. To see whether this is unique to gene search, I ran the coverage test on general keywords search, which is assumed to be the "reliable" search function here. Interestingly, although the coverage rate is much higher as expected, there are still cases with zero coverage rate. Also, homogeneity also occurs to general keywords search, although the keywords are more diversified than gene search.
+Conclusion: One guess is that there's actually no bug in gene search. The reason for low coverage rate and homogeneity is that we have much fewer gene name keywords compared to general keywords, making the gene search results not as conspicuous as general search results. Futher investigation in the future might need to be conducted. 

@@ -1,0 +1,8 @@
+old-well logo in results page needs to be moved
+re-cluster locally to debug
+comment out pattie voice
+move copyright div
+username is not reflected in results page
+if you're not signed in and you're on the results page and you want to sign in, you should be redirected back to results page
+re-direct sign in to user-alpha
+fix path to upload function

@@ -1,0 +1,40 @@
+<!doctype html>
+
+<title>Upload new File</title>
+<h2>Upload new File</h2>
+<form method=post enctype=multipart/form-data>
+  <input type=file name=file>
+  <!-- <input type="text" name="delimiter" id="delimiter" placeholder="delimiter..."> -->
+  <input type=submit value=Upload>
+  <button type="button" onclick='window.location.assign({{ url_for('home')|tojson }})' id="back_home" >Go Home</button>
+  {{ result }}
+</form>
+<p style = "font-family:georgia,garamond,serif;font-size:16px;font-style:italic;">
+<br>
+Notes:
+<br>
+1. Only .txt and .csv file formats are accepted.
+<br>
+<!-- 2. Please provide your delimiter (\n, \t, etc.) in the box if your file is .txt. If no delimiter is provided, the articles/items stored in each file is considered by default as divided by single blank lines.
+<br> -->
+2. If you are using a .txt file, please separate each of your items with a single blank line.
+<br>
+3. If you are using a .csv file, please put each of your items in a seperate row.
+<br>
+4. Please upload file smaller than 25 MB.
+</p>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<script>
+    var message = {{message|tojson}}
+    alert(message)
+</script>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<script>
+    const warning = {{warning|tojson}}
+    if(warning != "")
+        alert(warning)
+</script>

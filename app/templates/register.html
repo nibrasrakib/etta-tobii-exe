@@ -1,0 +1,65 @@
+{% block content %}
+<link rel="stylesheet" href="{{url_for('.static', filename='login.css')}}" />
+<link rel=stylesheet type=text/css href="{{ url_for('static',
+filename='bootstrap.min.css') }}">
+<div style="color: grey;height:10px" class="menu" id="menu">
+  <a href="." id="home_link" class="text_link" style="padding-left: 15px"
+    >Home</a
+  >
+</div>
+<h1 class="form-signin-heading">Sign Up</h1>
+<form class="form-signin" action="" method="post">
+  {{ form.hidden_tag() }}
+  <p>
+    {{ form.username.label }}<br />
+    {{ form.username(size=26) }}<br />
+    {% for error in form.username.errors %}
+    <span style="color: red">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <p>
+    {{ form.email.label }}<br />
+    {{ form.email(size=26) }}<br />
+    {% for error in form.email.errors %}
+    <span style="color: red">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <p>
+    {{ form.password.label }}<br />
+    {{ form.password(size=26) }}<br />
+    {% for error in form.password.errors %}
+    <span style="color: red">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <p>
+    {{ form.password2.label }}<br />
+    {{ form.password2(size=26) }}<br />
+    {% for error in form.password2.errors %}
+    <span style="color: red">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <div class="buttons" style="display: inline; float: left">
+    <p>{{ form.submit() }}</p>
+    <p style="text-align: center; width: 104%">
+	Already have an account?<a href="{{url_for('login')}}?target={{encoded_target}}"> Sign In</a>
+    </p>
+  </div>
+</form>
+<a
+  style="display: inline-block; margin-left: -115px;text-decoration: none"
+  href="https://pattie.unc.edu/Shibboleth.sso/Login"
+  id="submit"
+  class="onyen-signin"
+  ><img style="height: 27px; margin-top: -3px" src="static/old_well.png" /> Sign In with Onyen</a
+>
+
+{% endblock %}
+<script type=text/javascript>
+	/* get the target url to return to */
+	const encodedTarget = {{encoded_target|tojson}}
+	const loginHandlerUrl = {{url_for('onyen_login_handler')|tojson}}
+	/* double level of encoding is needed for browser to correctly do redirection */
+	const encodedOnyenSignInUrl = encodeURIComponent(loginHandlerUrl + "?target=" + encodedTarget)
+	document.getElementsByClassName("onyen-signin")[0].href = "https://pattie.unc.edu/Shibboleth.sso/Login?target=" +  encodedOnyenSignInUrl;
+
+</script>

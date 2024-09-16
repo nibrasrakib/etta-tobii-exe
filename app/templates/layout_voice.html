@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html lang="en">
+
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-153659007-2"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-153659007-2');
+	</script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>PATTIE - Publication Through Tiered Interaction & Exploration</title>
+
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	{% block head %}{% endblock %}
+
+</head>
+
+		<body>
+
+	<div class=page>
+			<div id ='tutorial'></div>
+			<div id="heading1">
+		<h1 id="main_heading"><a style=font-family:courier;color:DodgerBlue;opacity:0.70 href="./pattie_voice">PATTIE Voice</a><img src="static/unc_logo.png"></h1>
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+		{% for message in messages %}
+		<div class=flash>{{ message }}</div>
+		{% endfor %}
+		{% endif %}
+		{% endwith %}
+			</div>
+			<div style=color:grey;background-color:white class=menu id="menu">
+				<div id="sys_description" style="margin-top:20px">
+				</div>
+				<dt>
+
+					<a href='{{url_for('static', filename='PATTIE_voice_instructions.html')}}' class='text_link' onclick="return !window.open(this.href, 'tutorial', 'width=1000,height=700')" target="_blank" >About</a>
+
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+					<a target="_blank" href="http://usecases.unc.edu">Use-case Library</a>
+
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+					<a href="mailto:msortiz@live.unc.edu">Contact Us</a>
+
+
+					<dt>
+						<div class=copyright>
+								<small>Copyright &copy;
+								<script type="text/javascript">
+								 var d = new Date()
+								 document.write(d.getFullYear())
+								</script>
+								LAIR
+								</small>
+						</div>
+			</div>
+
+			{% block body %}{% endblock %}
+
+	</div>
+
+
+		</body>
+</html>

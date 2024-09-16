@@ -1,0 +1,92 @@
+{
+  "mappings" : {
+    "properties" : {
+      "abstract" : {
+        "type" : "text"
+      },
+      "affiliations" : {
+        "type" : "text"
+      },
+      "authors" : {
+        "type" : "text",
+        "fields" : {
+          "exact" : {
+            "type" : "keyword"
+          }
+        }
+      },
+      "mesh_headings" : {
+        "type" : "nested",
+        "properties" : {
+          "descriptor" : {
+            "type" : "text"
+          },
+          "qualifiers" : {
+            "type" : "text",
+            "fields" : {
+              "exact" : {
+                "type" : "keyword"
+              }
+            }
+          }
+        }
+      },
+      "source" : {
+        "properties" : {
+          "country" : {
+            "type" : "text"
+          },
+          "doi" : {
+            "type" : "keyword",
+            "ignore_above" : 256,
+  		      "index" : false
+          },
+          "issue" : {
+            "type" : "keyword",
+  		      "index" : false
+          },
+          "medium" : {
+            "type" : "text",
+  		      "index" : false
+          },
+          "pagination" : {
+            "type" : "keyword",
+  		      "index" : false
+          },
+          "pub_date" : {
+            "properties" : {
+              "month" : {
+                "type" : "keyword"
+              },
+              "year" : {
+                "type" : "short"
+              }
+            }
+          },
+          "title" : {
+            "type" : "text"
+          },
+          "title_abbrev" : {
+            "type" : "text"
+          },
+          "types" : {
+            "type" : "text",
+  		      "index" : false
+          },
+          "volume" : {
+            "type" : "keyword",
+  		      "index" : false
+          }
+        }
+      },
+      "title" : {
+        "type" : "text"
+      },
+	    "num_cited_by" : {
+		    "type" : "short",
+		    "index" : "false"
+	    } 
+    }
+  }
+}
+

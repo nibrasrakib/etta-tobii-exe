@@ -1,0 +1,15 @@
+# ignore editor specific files
+.python-version
+
+# ignore build system generated files
+flask_session/
+__pycache__/
+migrations/__pycache__/
+migrations/versions/__pycache__/
+.DS_Store
+
+# ignore local specific storage files
+user_reg.json
+app/app.db
+venv
+.env

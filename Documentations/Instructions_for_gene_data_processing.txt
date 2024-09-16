@@ -1,0 +1,10 @@
+1. Download gene data from https://www.ncbi.nlm.nih.gov/, which should be a text file
+2. The info of one gene would be on a single line and we could take advantage of that and use vim to clean up some data we don't need
+3. To get rid of genes with "hypothetical protein" in their descriptions, we'll use vim to delete lines containing such keyword;
+	to do that, we open up the gene data text file with vim and run the following command: :g/hypothetical protein/d
+	to save and quit vim, run :wq
+4. Now we have a cleaned up text file. To use it in our actual program, we'll need to convert it to a csv file:
+	open up excel and import the text file; only import the column "Symbol(Gene name)," "descriptions," and "Aliases/Synonyms"; 
+	Use excel's built in function to convert it to a csv file
+5. In python program, use pandas to load the csv file as dataframes and convert the dataframes into a python set, which is essentially a hash map.
+	The code that does this is currently in the function load_gene_data() in visual_library_plos.py

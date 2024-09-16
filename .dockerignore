@@ -1,0 +1,10 @@
+.git
+Dockerfile
+.gitignore
+*.DS_Store
+._*
+.venv
+flask_session
+__pycache__/
+.vscode
+**/*.pyc
