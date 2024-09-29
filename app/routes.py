@@ -43,6 +43,9 @@ from datetime import datetime
 from datetime import timedelta
 from collections import defaultdict
 import json
+# Import requests library
+import requests
+from tqdm import tqdm
 
 import pysolr
 from elasticsearch import Elasticsearch
@@ -64,6 +67,11 @@ es = Elasticsearch()
 # from flask.ext.uploads import UploadSet, configure_uploads, TEXT
 
 # for connecting to PLOS server
+
+from sklearn.metrics import silhouette_score
+from sklearn.cluster import KMeans
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 google_api_mapping = {
@@ -247,9 +255,10 @@ def re_cluster():
     # print(sessionData)
     # Get session data
     state = sessionData["state"]
-    print("state in re_cluster initially: ", state)
+    print("reclustering---->  state in re_cluster initially: ", state)
     num_cls = sessionData["num_cls"]
     dataset = sessionData["dataset"]
+    print("reclustering ----> dataset: ", dataset, "num_cls: ", num_cls)
     # Get cluster ids
     ids = sessionData["ids_" + str(state)]
     # print("ids: ", ids)
@@ -262,6 +271,9 @@ def re_cluster():
 
     doc_ids = list(set(doc_ids))  # remove duplicate doc ids
     entity = session["entity"]
+    
+    print("reclustering ----> entity: ", entity)
+    print("reclustering ----> doc_ids: ", doc_ids)
 
     if dataset == "Experts":
         num_cls = get_num_cls_for_experts(len(doc_ids))
@@ -426,7 +438,12 @@ def re_cluster():
         # Convert to sparse matrix
 
         doc_term_mat = vl.convert_sparse(doc_term_mat, keywords)
-
+        
+        if num_cls is None:
+            num_cls = optimal_number_of_clusters(doc_term_mat, max_clusters=10)
+            print("reclustering ----> optimal number of clusters: ", num_cls)
+            
+            
         # Re-cluster
         if dataset == "NYTIMES":
             id2members, cluster_centers, cluster_desc, coordinates, error = vl.kmeans(
@@ -491,7 +508,7 @@ def re_cluster():
                     edges.append(edge)
     # print(edges)
 
-    print('\nBIBLIOGRAPHY\n----------')
+    print('\n reclustering ----> BIBLIOGRAPHY\n----------')
     sources = []
     if dataset == "PubMedAPI":
         from collections import Counter
@@ -507,20 +524,50 @@ def re_cluster():
             bibliography = {"concepts": concepts, "references": references}
             sources.append(bibliography)
 
-    # # Store session data
-    # print("state in re_cluster before storing: ", state+1)
-    # sessionData["id2members_" + str(state + 1)] = id2members
-    # sessionData["cluster_desc_" + str(state + 1)] = cluster_desc
-    # sessionData["xy_" + str(state + 1)] = cluster_centers
-    # sessionData["hue_" + str(state + 1)] = hue
-    # sessionData["satr_" + str(state + 1)] = satr
-    # sessionData["chosen_" + str(state)] = ids
-    # sessionData["edges_" + str(state + 1)] = edges
-    # # sessionData['sources_' + str(state+1)] = sources
-    # sessionData["state"] = state + 1
+    
+    elif dataset == "PostgreSQL":
+        from collections import Counter
 
-    # receive_time = time.clock()
-    # response_time = str(round(receive_time - send_time, 3))
+        for cluster_id in sorted(id2members.keys()):
+            concepts = cluster_desc[cluster_id]
+            references = []
+            print(f'--------{cluster_id}---------')
+            for bib_id in id2members[cluster_id]:
+                references.append(bibs[bib_id])
+            print(references)
+            print('-----------------')
+            for paper in references:
+                if type(paper["author"]) != str and None in paper["author"]:
+                    paper["author"] = [i for i in paper["author"] if i]
+                    print(paper["author"])
+            # Add 'meshHeadings': [] to each reference in references
+            for ref in references:
+                ref['meshHeadings'] = []
+            bibliography = {"concepts": concepts, "references": references}
+            meshTerms = []
+            for ref in references:
+                meshHeadingList = ref.get("meshHeadings")  # ref["meshHeadings"]
+                for mesh in meshHeadingList:
+                    meshTerms.append(mesh["descriptor"])
+            id2meshTerms[cluster_id] = str(dict(Counter(meshTerms).most_common(20)))
+            sources.append(bibliography)
+            
+    elif dataset == "rss_feed":
+        from collections import Counter
+
+        for cluster_id in sorted(id2members.keys()):
+            concepts = cluster_desc[cluster_id]
+            references = []
+            print(f'--------{cluster_id}---------')
+            for bib_id in id2members[cluster_id]:
+                references.append(bibs[bib_id])
+            # print(references)
+            print('-----------------')
+            for ref in references:
+                ref['meshHeadings'] = []
+            bibliography = {"concepts": concepts, "references": references}
+            sources.append(bibliography)
+
     
     # Convert NumPy arrays to lists
     def convert_ndarray_to_list(obj):
@@ -562,10 +609,12 @@ def re_cluster():
     cluster_summary_list = [[value] for key, value in cluster_summary.items()]
     cluster_title_list = [[value] for key, value in cluster_title.items()]
     
-        # Store session data
-    print("state in re_cluster before storing: ", state+1)
+    # Store session data
+    def unpack_list(lst):
+        return [item for sublist in lst for item in sublist]
+    print("recustering ----> updated state to store session data: ", state+1)
     sessionData["id2members_" + str(state + 1)] = id2members
-    sessionData["cluster_desc_" + str(state + 1)] = convert_ndarray_to_list(cluster_title_list)
+    sessionData["cluster_desc_" + str(state + 1)] = unpack_list(convert_ndarray_to_list(cluster_title_list))
     sessionData["cluster_summary_" + str(state + 1)] = convert_ndarray_to_list(cluster_summary_list) # Check this later
     sessionData["xy_" + str(state + 1)] = cluster_centers
     sessionData["hue_" + str(state + 1)] = hue
@@ -577,13 +626,15 @@ def re_cluster():
 
     receive_time = time.clock()
     response_time = str(round(receive_time - send_time, 3))
-  
+    print("reclustering ----> cluster_title_list: ", convert_ndarray_to_list(cluster_title_list))
+    # Print after [[[...]]] to [[...]] for cluster_title_list by unpacking the list
     
+    print("reclustering ----> cluster_title_list unpacked: ", unpack_list(convert_ndarray_to_list(cluster_title_list)))
 
     cls = {
         "id2freq": id2freq,
-        "desc": cluster_title,
-        "summary": cluster_summary,
+        "desc": unpack_list(convert_ndarray_to_list(cluster_title_list)),
+        "summary": convert_ndarray_to_list(cluster_summary_list),
         "xy": cluster_centers,
         "xy_inter": coordinates,
         "edges": edges,
@@ -600,314 +651,6 @@ def re_cluster():
     print("re_cluster done")
     print("Keys of sessionData: ", sessionData.keys())
     return jsonify(cls=cls, newSessionData=sessionData)
-
-
-# @app.route("/_re_cluster", methods=["POST", "GET"])
-# def re_cluster():
-#     print("re_cluster")
-
-#     response_time = "0"
-#     send_time = time.clock()
-
-#     # Get sessionStorage data
-#     # print('------------------------SESSION DATA --------------------------')
-#     sessionData = request.values.get("sessionData")
-#     sessionData = json.loads(sessionData)
-#     # print(sessionData)
-#     # Get session data
-#     state = sessionData["state"]
-#     print("state in re_cluster initially: ", state)
-#     num_cls = sessionData["num_cls"]
-#     dataset = sessionData["dataset"]
-#     # Get cluster ids
-#     ids = sessionData["ids_" + str(state)]
-#     # print("ids: ", ids)
-
-#     # Get doc ids (in selected clusters)
-#     id2members = sessionData["id2members_" + str(state)]
-#     doc_ids = []
-#     for id in ids:
-#         doc_ids += id2members[id]
-
-#     doc_ids = list(set(doc_ids))  # remove duplicate doc ids
-#     entity = session["entity"]
-
-#     if dataset == "Experts":
-#         num_cls = get_num_cls_for_experts(len(doc_ids))
-
-#         doc_org = sessionData["docs_org"]
-#         org_ids = sessionData["org_ids_" + str(state)]
-#         doc_term_mat = []
-#         org_ids_ = []  # original document ids
-#         for id in doc_ids:
-#             id_ = id
-#             org_ids_.append(id_)
-#             doc_term_mat.append(doc_org[id_])
-
-#         doc_term_mat, dfr = vl.compute_tfidf(
-#             doc_term_mat, sessionData["df_org"], rank=5
-#         )
-
-#         keywords = vl.output_keywords(
-#             len(doc_term_mat), dfr, sessionData["df_org"], p_docs=1.0
-#         )
-
-#         doc_term_mat, org_ids_ = vl.update(doc_term_mat, keywords, org_ids_)
-#         sessionData["org_ids_" + str(state + 1)] = org_ids_
-
-#         bibs = session["bibs_0"]
-#         bibs_new = []
-#         for id in org_ids_:
-#             # print(id, bibs[id])
-#             bibs_new.append(bibs[id])
-#         session["bibs_" + str(state + 1)] = bibs_new
-
-#         doc_term_mat = vl.convert_sparse(doc_term_mat, keywords)
-#         if entity == "experts":
-#             id2members, cluster_centers, coordinates, error = vl.kmeans_doc_doc(
-#                 doc_term_mat, keywords, org_ids, n_components=20, k=num_cls, n_desc=15
-#             )
-
-#             cluster_desc = []
-#             for i, m in id2members.items():
-#                 desc = [
-#                     bibs[j]["title"] for j in m[:15]
-#                 ]  # get the first 15 expert names as cluster labels
-#                 cluster_desc.append(desc)
-#         else:  # entity is 'topics'
-#             id2members, cluster_centers, cluster_desc, coordinates, error = vl.kmeans(
-#                 doc_term_mat, keywords, org_ids, n_components=20, k=num_cls, n_desc=15
-#             )
-
-#     elif entity == "authors":
-#         # Get doc data
-#         author_org = sessionData["docs_org"]
-#         org_ids = sessionData["org_ids_" + str(state)]
-#         author_term_mat = []
-#         org_ids_ = []  # original document ids
-#         for id in doc_ids:
-#             # id_ = org_ids[id]
-#             id_ = id
-#             org_ids_.append(id_)
-#             author_term_mat.append(author_org[id_])
-
-#         # Redo feature selection
-#         # print("Re-computing TFIDF and finding key terms...")
-#         author_term_mat, dfr = vl.compute_tfidf(
-#             author_term_mat, sessionData["df_org"], rank=5
-#         )
-
-#         # Sort and output results (discovered keywords)
-#         keywords = vl.output_keywords(
-#             len(author_term_mat), dfr, sessionData["df_org"], p_docs=0.5
-#         )
-
-#         # Create new matrix with the keywords
-#         author_term_mat, org_ids_ = vl.update(author_term_mat, keywords, org_ids_)
-#         sessionData["org_ids_" + str(state + 1)] = org_ids_
-
-#         bibs = session["bibs_0"]
-#         bibs_new = []
-#         for id in org_ids_:
-#             print(id, bibs[id])
-#             bibs_new.append(bibs[id])
-#         session["bibs_" + str(state + 1)] = bibs_new
-
-#         author_term_mat = vl.convert_sparse(author_term_mat, keywords)
-#         id2authors, cluster_centers, coordinates, error = vl.kmeans_author_author(
-#             author_term_mat, keywords, org_ids, n_components=20, k=10, n_desc=15
-#         )
-
-#         author_names = session["author_names"]
-#         author_docs = session["author_docs"]
-#         cluster_desc = []
-#         id2members = {}
-#         for cluster in sorted(id2authors.keys()):
-#             author_ids = id2authors[cluster]
-#             authors = []
-#             for i in author_ids:
-#                 authors.append(author_names[i])
-
-#             documents = set()
-#             for author in authors:
-#                 docs = author_docs[author]
-#                 for doc_tuple in docs:
-#                     (doc_id, author_sequence) = doc_tuple
-#                     if (
-#                         author_sequence == 1 or author_sequence == 2
-#                     ):  # first/second author of this doc
-#                         documents.add(doc_id)
-
-#             if (
-#                 not documents
-#             ):  # if so unlucky that no authors in this cluster are listed as first/second author of any articles
-#                 top_n = min(3, len(authors))
-#                 for author in authors[
-#                     :top_n
-#                 ]:  # only for the first few authors in cluster
-#                     docs = author_docs[author]
-#                     most_related_doc = min(
-#                         docs, key=lambda x: x[1]
-#                     )  # get the article where current author is listed at the highest position compared to his/her other articles
-#                     documents.add(most_related_doc[0])
-
-#             authors = authors[:15]
-#             cluster_desc.append(authors)
-#             id2members[cluster] = list(documents)
-
-#     else:
-#         # Get doc data
-#         doc_org = sessionData["docs_org"]
-#         org_ids = sessionData["org_ids_" + str(state)]
-#         doc_term_mat = []
-#         org_ids_ = []  # original document ids
-#         for id in doc_ids:
-#             # id_ = org_ids[id]
-#             id_ = id
-#             org_ids_.append(id_)
-#             doc_term_mat.append(doc_org[id_])
-
-#         # Redo feature selection
-#         # print("Re-computing TFIDF and finding key terms...")
-#         doc_term_mat, dfr = vl.compute_tfidf(
-#             doc_term_mat, sessionData["df_org"], rank=5
-#         )
-
-#         # Sort and output results (discovered keywords)
-#         keywords = vl.output_keywords(
-#             len(doc_term_mat), dfr, sessionData["df_org"], p_docs=0.5
-#         )
-
-#         # Create new matrix with the keywords
-#         doc_term_mat, org_ids_ = vl.update(doc_term_mat, keywords, org_ids_)
-#         sessionData["org_ids_" + str(state + 1)] = org_ids_
-
-#         # Prepare bibliographies if num of documents is small
-
-#         # if len(org_ids_) < 50:
-#         bibs = session["bibs_0"]
-#         bibs_new = []
-#         for id in org_ids_:
-#             # print(id, bibs[id])
-#             bibs_new.append(bibs[id])
-#         session["bibs_" + str(state + 1)] = bibs_new
-
-#         # Convert to sparse matrix
-
-#         doc_term_mat = vl.convert_sparse(doc_term_mat, keywords)
-
-#         # Re-cluster
-#         if dataset == "NYTIMES":
-#             id2members, cluster_centers, cluster_desc, coordinates, error = vl.kmeans(
-#                 doc_term_mat, keywords, org_ids_, n_components=7, k=num_cls, n_desc=15
-#             )
-#         else:
-#             # print(dataset)  # newly add
-#             id2members, cluster_centers, cluster_desc, coordinates, error = vl.kmeans(
-#                 doc_term_mat, keywords, org_ids_, n_components=10, k=num_cls, n_desc=25
-#             )
-
-#     id2freq = {x: len(id2members[x]) for x in id2members}
-
-#     # Get cluster colors
-#     cc = np.array(cluster_centers) - 0.5
-#     hue = ((np.arctan2(cc[:, 1], cc[:, 0]) / np.pi + 1) * 180).astype(int).tolist()
-#     satr = (np.linalg.norm(cc, axis=1) / math.sqrt(2) * 2).tolist()
-#     val = [0.6] * len(id2freq)
-#     print("Obtain cluster colors")
-
-#     # create adjacency matrix that will be used for network edges
-#     centroid_matrix = pd.DataFrame.from_records(cluster_centers)
-#     centroid_distances = pd.DataFrame(
-#         squareform(pdist(centroid_matrix, metric="euclidean")),
-#         columns=list(id2members.keys()),
-#         index=list(id2members.keys()),
-#     ).to_dict()
-
-#     # create network data structure
-#     # print('\nEUCLIDEAN DISTANCES\n----------')
-#     edges = []
-#     for i in id2members:
-#         for k, v in centroid_distances[i].items():
-#             # print(i, ' to ', k, ' = ', v)
-#             if i != k:
-#                 if v > 0.75:
-#                     v = "Distant"
-#                     edge = {
-#                         "clusterID": i,
-#                         "source": cluster_centers[i],
-#                         "target": cluster_centers[k],
-#                         "distance": v,
-#                     }
-#                     edges.append(edge)
-#                 elif v <= 0.75 and v > 0.50:
-#                     v = "Similar"
-#                     edge = {
-#                         "clusterID": i,
-#                         "source": cluster_centers[i],
-#                         "target": cluster_centers[k],
-#                         "distance": v,
-#                     }
-#                     edges.append(edge)
-#                 elif v <= 0.50:
-#                     v = "Very Similar"
-#                     edge = {
-#                         "clusterID": i,
-#                         "source": cluster_centers[i],
-#                         "target": cluster_centers[k],
-#                         "distance": v,
-#                     }
-#                     edges.append(edge)
-#     # print(edges)
-
-#     print('\nBIBLIOGRAPHY\n----------')
-#     sources = []
-#     if dataset == "PubMedAPI":
-#         for cluster_id in sorted(id2members.keys()):
-#             concepts = cluster_desc[cluster_id]
-#             references = []
-#             for bib_id in id2members[cluster_id]:
-#                 references.append(bibs[bib_id])
-#             for paper in references:
-#                 if type(paper["author"]) != str and None in paper["author"]:
-#                     paper["author"] = [i for i in paper["author"] if i]
-#             bibliography = {"concepts": concepts, "references": references}
-#             sources.append(bibliography)
-
-#     # Store session data
-#     print("state in re_cluster before storing: ", state+1)
-#     sessionData["id2members_" + str(state + 1)] = id2members
-#     sessionData["cluster_desc_" + str(state + 1)] = cluster_desc
-#     sessionData["xy_" + str(state + 1)] = cluster_centers
-#     sessionData["hue_" + str(state + 1)] = hue
-#     sessionData["satr_" + str(state + 1)] = satr
-#     sessionData["chosen_" + str(state)] = ids
-#     sessionData["edges_" + str(state + 1)] = edges
-#     # sessionData['sources_' + str(state+1)] = sources
-#     sessionData["state"] = state + 1
-
-#     receive_time = time.clock()
-#     response_time = str(round(receive_time - send_time, 3))
-
-#     cls = {
-#         "id2freq": id2freq,
-#         "desc": cluster_desc,
-#         "xy": cluster_centers,
-#         "xy_inter": coordinates,
-#         "edges": edges,
-#         "hue": hue,
-#         "satr": satr,
-#         "val": val,
-#         "bibs": bibs_new,
-#         "id2members": id2members,
-#         "sources": sources,
-#         "response_time": response_time,
-#     }
-#     print("cluster_centers: ", cluster_centers)
-#     print("state in re_cluster finally", state+1) 
-#     print("re_cluster done")
-#     print("Keys of sessionData: ", sessionData.keys())
-#     return jsonify(cls=cls, newSessionData=sessionData)
 
 
 """
@@ -997,7 +740,8 @@ def cluster():
     state = 0
     send_time = time.clock()
     error = None
-    dataset = request.args.get("dataset_opt", "")
+    # dataset = request.args.get("dataset_opt", "")
+    dataset = "rss_feed"
 
     field = "All fields"
     raw_query = request.args.get("query", "")
@@ -1085,7 +829,7 @@ def cluster():
         num_cls = int(num_cls)
 
         if error == None:
-
+        ##########################################
             # if entity == 'genes':
             #    doc_term_mat, df, w2id, bibs = vl.read_df_genes(
             #        session['gene_set'], data, dataset, stopwords)
@@ -1096,6 +840,7 @@ def cluster():
             #    #     data, dataset, stopwords)
             #    orig_doc_term_mat, orig_df, df, dfr, keywords, cluster_centers, cluster_desc, coordinates, id2members, bibs, org_ids, author_names, author_docs = vl.process_authors_4(data, dataset, stopwords)
             # else:
+        ##########################################
             doc_term_mat, df, w2id, bibs = vl.read_df_digi(data, dataset, stopwords)
         else:
             # flash(error)
@@ -1328,7 +1073,7 @@ def cluster():
     elif dataset == "PostgreSQL":
         print("PostgreSQL in routes.py")
         import cluster_postgreSQL
-        from cluster_postgreSQL import retrieve_from_postgresql, execute_query
+        from cluster_postgreSQL import retrieve_from_postgresql, execute_query, search_database_by_keyword, optimal_number_of_clusters
         num_cls = int(num_cls)
         data, error = retrieve_from_postgresql(q)
         print(data, error)
@@ -1356,7 +1101,42 @@ def cluster():
                 ) = vl.process_authors_4(data, dataset, stopwords)
             else:
                 doc_term_mat, df, w2id, bibs = vl.read_df(data, dataset, stopwords)
-                
+             
+     
+    elif dataset == "rss_feed":
+        print("rss_feed in routes.py")
+        import cluster_postgreSQL
+        from cluster_postgreSQL import retrieve_from_postgresql, execute_query, search_database_by_keyword, optimal_number_of_clusters
+        num_cls = int(num_cls)
+        # data, error = retrieve_from_postgresql(q)
+        # data, error = retrieve_data(q)
+        data, error = search_database_by_keyword(q)
+        print(data, error)
+        print(type(data), data.columns.tolist())
+        if error == None:
+            if entity == "genes":
+                doc_term_mat, df, w2id, bibs = vl.read_df_genes(
+                    session["gene_set"], data, dataset, stopwords
+                )
+            elif entity == "authors":
+                (
+                    orig_doc_term_mat,
+                    orig_df,
+                    df,
+                    dfr,
+                    keywords,
+                    cluster_centers,
+                    cluster_desc,
+                    coordinates,
+                    id2members,
+                    bibs,
+                    org_ids,
+                    author_names,
+                    author_docs,
+                ) = vl.process_authors_4(data, dataset, stopwords)
+            else:
+                doc_term_mat, df, w2id, bibs = vl.read_df(data, dataset, stopwords)
+   
     # uploaded dataset
     else:
         # num_cls = 10
@@ -1414,6 +1194,14 @@ def cluster():
         # Clustering
         # print()
         # print("Clustering...")
+        # Determine the best number of clusters if not provided
+        if num_cls is None:
+            num_cls = optimal_number_of_clusters(doc_term_mat, max_clusters=10)
+        else:
+            num_cls = int(num_cls)
+
+        print(f"Optimal number of clusters: {num_cls}")
+        
 
         # n_components: number of dimensions for LSA
         # k: number of clusters
@@ -1559,6 +1347,33 @@ def cluster():
                     meshTerms.append(mesh["descriptor"])
             id2meshTerms[cluster_id] = str(dict(Counter(meshTerms).most_common(20)))
             sources.append(bibliography)
+            
+    if dataset == "rss_feed":
+        from collections import Counter
+
+        for cluster_id in sorted(id2members.keys()):
+            concepts = cluster_desc[cluster_id]
+            references = []
+            print(f'--------{cluster_id}---------')
+            for bib_id in id2members[cluster_id]:
+                references.append(bibs[bib_id])
+            # print(references)
+            print('-----------------')
+            # for paper in references:
+            #     if type(paper["author"]) != str and None in paper["author"]:
+            #         paper["author"] = [i for i in paper["author"] if i]
+            #         print(paper["author"])
+            # Add 'meshHeadings': [] to each reference in references
+            for ref in references:
+                ref['meshHeadings'] = []
+            bibliography = {"concepts": concepts, "references": references}
+            meshTerms = []
+            for ref in references:
+                meshHeadingList = ref.get("meshHeadings")  # ref["meshHeadings"]
+                for mesh in meshHeadingList:
+                    meshTerms.append(mesh["descriptor"])
+            id2meshTerms[cluster_id] = str(dict(Counter(meshTerms).most_common(20)))
+            sources.append(bibliography)
 
     """
     cnt = np.unique(membership, return_counts=True)
@@ -1615,24 +1430,7 @@ def cluster():
     # Ensure coordinates is a list
     coordinates_list = convert_ndarray_to_list(coordinates)
 
-
-
-    # sessionData = {}
-    # # persist session data in a pure json data, which will be used to store in js sessionStorage
-    # sessionData["docs_org"] = orig_doc_term_mat_list  # doc-term raw freq matrix
-    # sessionData["df_org"] = orig_df_list
-    # sessionData["num_cls"] = num_cls
-    # sessionData["id2members_0"] = id2members
-    # sessionData["cluster_desc_0"] = cluster_desc
-    # sessionData["xy_0"] = cluster_centers_list
-    # sessionData["state"] = state
-    # sessionData["hue_0"] = hue
-    # sessionData["satr_0"] = satr
-    # sessionData["org_ids_0"] = org_ids
-    # # sessionData['bibs_0'] = bibs
-    # sessionData["dataset"] = dataset
-    # sessionData["edges_0"] = edges
-    # sessionData["sources"] = sources
+    
     
     # Generate summaries for each cluster
     cluster_summary = {}
@@ -1661,10 +1459,13 @@ def cluster():
         # If summary title is a sentence, i want it to be a list of words
         summary_title = summary_title.split()
         cluster_title[cluster_id] = summary_title
+    
     cluster_summary_list = [[value] for key, value in cluster_summary.items()]
     cluster_title_list = [[value] for key, value in cluster_title.items()]
    
     session["cluster_desc_0"] = cluster_title_list
+    def unpack_list(lst):
+        return [item for sublist in lst for item in sublist]
     
     sessionData = {
         "docs_org": convert_ndarray_to_list(orig_doc_term_mat),  # doc-term raw freq matrix
@@ -1672,7 +1473,7 @@ def cluster():
         "num_cls": num_cls,
         "id2members_0": convert_ndarray_to_list(id2members),
         # "cluster_desc_0": convert_ndarray_to_list(cluster_desc),
-        "cluster_desc_0": convert_ndarray_to_list(cluster_title_list),
+        "cluster_desc_0": unpack_list(convert_ndarray_to_list(cluster_title_list)),
         "cluster_summary_0": convert_ndarray_to_list(cluster_summary_list),
         "xy_0": convert_ndarray_to_list(cluster_centers),
         "state": state,
@@ -1688,22 +1489,6 @@ def cluster():
     # session['dfr'] = dfr_new
     # session['keywords'] = keywords
 
-    # print("bibs")
-    # print(bibs)
-
-    # output the data to terminal
-    # print('\nCENTROIDS\n----------')
-    # print(cluster_centers)
-    # print('\nCENTROID DISTANCES\n----------')
-    # print(centroid_distances)
-    # print('\nCLUSTER LABELS\n----------')
-    # print(cluster_desc)
-    # print('\nCLUSTER ID & PUBLICATIONS\n----------')
-    # print(id2members)
-    # print('\nCLUSTER ID & PUBLICATION COUNT\n----------')
-    # print(id2freq)
-    # print('\nNETWORK\n----------')
-    # print(edges)
 
     #    username = 'username'
 
@@ -1714,6 +1499,11 @@ def cluster():
     # return render_template("result.html",
     receive_time = time.clock()
     response_time = str(round(receive_time - send_time, 3))
+    
+    # Print the cluster_title_list
+    print("cluster_title_list of sessionData: ", cluster_title_list)
+    print("cluster_title of render_template: ", cluster_title)
+    print("cluster_title_list in converted form: ", convert_ndarray_to_list(cluster_title_list))
     
 
     if entity == "authors" or entity == "experts" or entity == "topics":
@@ -1801,8 +1591,6 @@ def csv_file(filename):
 
 
 # for server
-
-
 @app.route("/..")
 def csv_folder():
     print("csv_folder")
@@ -1810,8 +1598,6 @@ def csv_folder():
 
 
 # for server
-
-
 @app.route("/help")
 def help():
     print("help")

@@ -41,7 +41,8 @@ var num_cls = {{num_cls|tojson}};
 var dataset = {{dataset|tojson}}
 const query_string = window.location.search;
 const url_params = new URLSearchParams(query_string);
-const dataset_opt = url_params.get('dataset_opt');
+const dataset_opt = 'rss_feed';
+// const dataset_opt = url_params.get('dataset_opt');
 const entity = url_params.get('entity');
 if (dataset_opt != 'PubMedAPI' && dataset_opt != 'Experts'){
 	const entities_menu = document.getElementById('entities_menu');
@@ -56,6 +57,12 @@ else if (dataset_opt == 'DigiSquare'){
 		entities_menu.style.opacity = 0;
 	}
 }
+// else if (dataset_opt == 'rss_feed'){
+// 	const entities_menu = document.getElementById('entities_menu');
+// 	if (entities_menu) {
+// 		entities_menu.style.opacity = 0;
+// 	}
+// }
 var zoom_in_threshold = 10;
 if (dataset_opt == 'Experts') {
 	zoom_in_threshold = 6;
@@ -63,21 +70,6 @@ if (dataset_opt == 'Experts') {
 var opened_id;
 var opened_edges_id = new Set();
 var doc_open = false;
-//console.log(`Num_cls:${num_cls}`);
-//console.log(dataset);
-// const entity = urlParams.get('entity');
-// console.log(entity);
-// if(entity !== 'keywords' && entity!=='genes' && entity !== 'pharmacology'){
-// 	console.log(document.getElementById('pharmacology').innerHTML);
-// }
-//console.log("Hello");
-//console.log(path);
-//console.log("Bye");
-//if ('{{dataset}}' == "NYTIMES"){
-//  document.getElementById("main_heading").innerHTML= '<a href=".">Patty for NYTIMES</a>';
-//}else{
-//  document.getElementById("main_heading").innerHTML= '<a href=".">Patty</a>';
-//}
 
 //global functions
 //click on tutorials
@@ -136,32 +128,6 @@ function turnOffLoadingPrompt() {
 	document.getElementsByTagName("nav")[0].style.opacity = 0.7;
 	document.getElementById("loading").style.display="none";
 }
-//const entitySearchMapping = {
-//	'genes': 'genetics[subheading]',
-//	'drugs': 'DE[subheading]',
-//	'diseases': 'complications[subheading]',
-//	'treatment': 'diagnosis[subheading] OR therapy[subheading]',
-//	'pharmacology': 'pharmacology[subheading]',
-//	'epidemiology': 'epidemiology[subheading]',
-//	'anthropology': 'anthropology[subheading]',
-//	'methods': 'methods[subheading]',
-//	'education': 'education[subheading]',
-//	'economics': 'economics[subheading]',
-//	'history': 'history[subheading]',
-//	'trends': 'trends[subheading]',
-//}
-//function getDecoratedQuery(entity) {
-//	const rawQuery = $('#query-secondary').val();
-//	const decoration = entitySearchMapping[entity];
-//	switch(entity) {
-//		case 'keywords':
-//			return rawQuery;
-//		case 'authors':
-//			return rawQuery;
-//		default:
-//			return `${rawQuery} AND ${decoration}`;
-//	}
-//}
 
 function refreshEntity(entity){
 	var needLoadingPrompt = false;
@@ -302,61 +268,6 @@ function shorten(words, count)  {
     return keywords;
 }
 
-// function shorten(words, count)  {
-//     var keywords = []
-// 	if (dataset_opt == 'Experts') {
-// 	    var words_count = parseInt(words.length * count / 25);
-// 	    if ( words_count > 5) {
-// 	        words_count = 5;
-// 	    } else if (words_count < 3) {
-// 	        words_count = Math.min(3, words.length);
-// 	    }
-//     	for ( var i = 0 ; i < words_count ; i++) {
-//     	    word = words[i];
-//     	    if (word.length >= 18) {
-//     	        word_tokens = word.split(', ');
-//     	        const name = word_tokens.shift() + ', ';
-//     	        const academic_titles = word_tokens.join(', ');
-//     	        keywords.push({'term': name, 'flag': 'first_part', 'color_code': i%2});
-//     	        keywords.push({'term': academic_titles, 'flag': 'last_part', 'color_code': i%2});
-//     	    } else {
-//     	        keywords.push({'term': word, 'flag': undefined, 'color_code': i%2});
-//     	    }
-//     	}
-
-// 	} else {
-//     	var words_count = parseInt(words.length * count / 50);
-//     	if ( words_count > 5) {
-//     	    words_count = 5;
-//     	} else if (words_count < 2) {
-//     	    words_count = Math.min(2, words.length);
-//     	}
-//     	for ( var i = 0 ; i < words_count ; i++) {
-//     	    word = words[i];
-//     	    if (word.length >= 18) {
-//     	        word_tokens = word.split(' ');
-//     	        const last_name = word_tokens.pop()
-//     	        const first_middle_name = word_tokens.join(' ');
-//     	        keywords.push({'term': first_middle_name, 'flag': 'first_part', 'color_code': i%2});
-//     	        keywords.push({'term': last_name, 'flag': 'last_part', 'color_code': i%2});
-//     	    } else {
-//     	        keywords.push({'term': word, 'flag': undefined, 'color_code': i%2});
-//     	    }
-//     	}
-// 	}
-
-//     return keywords;
-// };
-
-
-// function compute_font_scale(cluster_radius, keywords) {
-// 	const longest_term = [...keywords].sort(function (a, b) { return b.length - a.length })[0];
-// 	const text_block_width_factor = longest_term.length * 2;
-// 	const text_block_height_factor = keywords.length * 1.5; // extra 0.5 is for space between labels
-// 	const diagonal_length = Math.sqrt(text_block_width_factor * text_block_width_factor + text_block_height_factor * text_block_height_factor);
-// 	const font_scale = cluster_radius / diagonal_length;
-// 	return font_scale;
-// }
 function compute_font_scale(cluster_radius, keywords) {
     const longest_term = [...keywords].sort((a, b) => b.length - a.length)[0];
     const text_block_width_factor = longest_term.length;
@@ -1103,381 +1014,884 @@ function citationGenerator(id){
             data: { mydata: id}
         });
 		return jqXHR;
-		// try{
-		// 	var response = axios.get(`https://cors-anywhere.herokuapp.com/https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${id}&retmode=json`)
-		// 	.then(resp => {
-		// 		console.log(resp.data.result[id]);
-		// 	});
-		// 	// var data = await response.json();
-		// 	// console.log(data.result);
-		// }catch(err){
-		// 	alert(err);
-		// 	return " ";
-		// }
-        // // console.log(Object.keys(data.result));
-        // var new_id = id.toString();
-        // // console.log(data.result[id]);
-        // var authors = "";
-        // // for(i=0; i<data.result[id].authors.length; i++){
-        // //  console.log(data.result[id].authors[i]);
-        // //  authors += data.result[id].authors[i].name;
-        // //  authors += ',';
-        // // }
-		// console.log(data);
-        // console.log(author.length);
-        // if(author.length == 0){
-        //     if(data.result[id].issue == ""){
-        //         console.log(`${data.result[id].title} ${data.result[id].source} ${data.result[id].pubdate};${data.result[id].volume}(${data.result[id].issue}):${data.result[id].pages}. ${data.result[id].elocationid}`)
-        //         return `${data.result[id].title} ${data.result[id].source} ${data.result[id].pubdate};${data.result[id].volume}(${data.result[id].issue}):${data.result[id].pages}. ${data.result[id].elocationid}`;
-        //     }
-        //     console.log(`${data.result[id].title} ${data.result[id].source} ${data.result[id].pubdate};${data.result[id].volume}:${data.result[id].pages}. ${data.result[id].elocationid}`);
-        //     return `${data.result[id].title} ${data.result[id].source} ${data.result[id].pubdate};${data.result[id].volume}:${data.result[id].pages}. ${data.result[id].elocationid}`;
-        // }
-        // console.log(`${author}. "${data.result[id].title}" ${data.result[id].source} ${data.result[id].pubdate}; ${data.result[id].volume}(${data.result[id].issue}):${data.result[id].pages}. ${data.result[id].elocationid}`);
-        // return `${author}. "${data.result[id].title}" ${data.result[id].source} ${data.result[id].pubdate}; ${data.result[id].volume}(${data.result[id].issue}):${data.result[id].pages}. ${data.result[id].elocationid}`;
-    }
+}
 
-
-	function showDocuments(d){
-		console.log('show Documents');
-		var dataset_opt = urlParams.get('dataset_opt');
-		 var bibs_list = '';
-		 var bibs_length = d.members.length;
-		 console.log("bibs="+bibs_length);
-		 var document_array = [];
-		 var uploaded_document_array = [];
-		 var citation_dict = {};
-		 for (var j=0; j<bibs_length; j++){
-			 if(d.bibs[j].title == undefined){
-				 //console.log("titles are undefined")
-				 var ind = j+1;
-				 bibs_list = '';
-			 }else if (d.bibs[j].html == undefined){
-				 //console.log("html is undefined")
-				 var ind = j+1;
-				 var pmid = d.bibs[j].pmid;
-				 //console.log(d.bibs[j].author)
-				 body_toshow = d.bibs[j].body_toshow;
-				 if (pmid == undefined){
-					 if (body_toshow != undefined){
-						 //console.log("body_toshow is not undefined")
-						 body_toshow = body_toshow.replace(/'/g, '_singlequote_');
-						 body_toshow = body_toshow.replace(/"/g, '_doublequote_');
-						 body_toshow = body_toshow.replace(/\n/g, ' _startinganewline_ ');
-						 bibs_list = bibs_list + '<br>' + '<a href=# class = "text_link" id="text_link'+ind+'" onclick="show_uploaded_articles(\''+ body_toshow + '\',\'text_link'+ind+'\')" >' + d.bibs[j].title + '</a> <br>';
-						 uploaded_document_array.push('<a href=# class = "text_link" id="text_link'+ind+'" onclick="show_uploaded_articles(\''+ body_toshow + '\',\'text_link'+ind+'\')" >' + d.bibs[j].title + '</a> <br>');
-					 }else{
-						 bibs_list = bibs_list + '<br>' + '<a href =' + '"https://www.ncbi.nlm.nih.gov/pubmed/?term=' + d.bibs[j].title + '%5Buid%5D" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank" >' + d.bibs[j].title + '</a> <br>'+ d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>'+ d.bibs[j].pdate + '<br>' + '</br>';
-					 }
-				 }else{
-					 bibs_list = bibs_list + '<br>' + `<a href =` + '"https://www.ncbi.nlm.nih.gov/pubmed/?term=' + pmid + '%5Buid%5D" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank" >' + d.bibs[j].title + '</a> <br>'+ d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>'+ d.bibs[j].pdate + '<br>' + '</br>';
-				 }
-			 }else{
-				bibs_list = bibs_list + '<br>' + '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>'
-        bibs_list = bibs_list + d.bibs[j].abstract + '<br>'
+	function showDocuments(d) {
+		// console.log("show Documents");
+		var dataset_opt = urlParams.get("dataset_opt");
+		var bibs_list = "";
+		var bibs_length = d.members.length;
+		// console.log("bibs=" + bibs_length);
+		var document_array = [];
+		var uploaded_document_array = [];
+		var citation_dict = {};
+		// console.log("bibs length=" + bibs_length);
+		// console.log("dataset_opt=" + dataset_opt);
+		// print the documents
+		// console.log("Documents: "+ JSON.stringify(d));
+		for (var j = 0; j < bibs_length; j++) {
+			if (d.bibs[j].title == undefined) {
+				console.log("titles are undefined")
+				var ind = j + 1;
+				bibs_list = "";
+			} 
+			else if (d.bibs[j].html == undefined) {
+				console.log("html is undefined")
+				var ind = j + 1;
+				var pmid = d.bibs[j].pmid;
+				//console.log(d.bibs[j].author)
+				body_toshow = d.bibs[j].body_toshow;
+				if (pmid == undefined) {
+					if (body_toshow != undefined) {
+						//console.log("body_toshow is not undefined")
+						body_toshow = body_toshow.replace(/'/g, "_singlequote_");
+						body_toshow = body_toshow.replace(/"/g, "_doublequote_");
+						body_toshow = body_toshow.replace(/\n/g, " _startinganewline_ ");
+						bibs_list =
+							bibs_list +
+							"<br>" +
+							'<a href=# class = "text_link" id="text_link' +
+							ind +
+							'" onclick="show_uploaded_articles(\'' +
+							body_toshow +
+							"','text_link" +
+							ind +
+							"')\" >" +
+							d.bibs[j].title +
+							"</a> <br>";
+						uploaded_document_array.push(
+							'<a href=# class = "text_link" id="text_link' +
+								ind +
+								'" onclick="show_uploaded_articles(\'' +
+								body_toshow +
+								"','text_link" +
+								ind +
+								"')\" >" +
+								d.bibs[j].title +
+								"</a> <br>",
+						);
+					} else {
+						bibs_list =
+							bibs_list +
+							"<br>" +
+							"<a href =" +
+							'"https://www.ncbi.nlm.nih.gov/pubmed/?term=' +
+							d.bibs[j].title +
+							'%5Buid%5D" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank" >' +
+							d.bibs[j].title +
+							"</a> <br>" +
+							d.bibs[j].author +
+							"<br>" +
+							d.bibs[j].journal +
+							"<br>" +
+							d.bibs[j].pdate +
+							"<br>" +
+							"</br>";
+					}
+				} else {
+					bibs_list =
+						bibs_list +
+						"<br>" +
+						`<a href =` +
+						'"https://www.ncbi.nlm.nih.gov/pubmed/?term=' +
+						pmid +
+						'%5Buid%5D" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank" >' +
+						d.bibs[j].title +
+						"</a> <br>" +
+						d.bibs[j].author +
+						"<br>" +
+						d.bibs[j].journal +
+						"<br>" +
+						d.bibs[j].pdate +
+						"<br>" +
+						"</br>";
+				}
+			} 
+			else {
+				bibs_list =
+					bibs_list +
+					"<br>" +
+					'<a href ="' +
+					d.bibs[j].html +
+					'" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' +
+					d.bibs[j].title +
+					"</a> <br>";
+				// bibs_list = bibs_list + d.bibs[j].abstract + "<br>";
+				bibs_list = bibs_list + "<br>";
 				//create div to put title, authors, and citation button in
-				var div = document.createElement('div');
-				var a = document.createElement('a');
-				a.innerHTML = '\n';
-				a.innerHTML += '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>';
+				var div = document.createElement("div");
+				var a = document.createElement("a");
+				a.innerHTML = "\n";
+				a.innerHTML +=
+					'<a href ="' +
+					d.bibs[j].html +
+					'" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' +
+					d.bibs[j].title +
+					"</a> <br>";
 				div.appendChild(a);
-				let author_string = '';
-				if(dataset_opt == 'PubMedAPI'){
-					for (var element in d.bibs[j]){
-						if (element == 'author' || element == 'authors'){
+				let author_string = "";
+				if (dataset_opt == "PubMedAPI") {
+					for (var element in d.bibs[j]) {
+						if (element == "author" || element == "authors") {
 							//console.log("element is " + d.bibs[j][element] )
-							if(d.bibs[j][element].length == 0){
-							   var p = document.createElement('p');
-							   p.innerHTML = '<i> No authors listed<i/>';
-							   div.appendChild(p);
-							   bibs_list = bibs_list + '<i> No authors listed<i/>' + '<br>'
-							}
-							else if(d.bibs[j][element].length > 5){
+							if (d.bibs[j][element].length == 0) {
+								var p = document.createElement("p");
+								p.innerHTML = "<i> No authors listed<i/>";
+								div.appendChild(p);
+								bibs_list = bibs_list + "<i> No authors listed<i/>" + "<br>";
+							} else if (d.bibs[j][element].length > 5) {
 								var n = 5;
-								console.log("LAIR",d.bibs[j][element]);
-								console.log("LAIR",d.bibs[j][element].length);
-								const array = d.bibs[j][element].slice(0,n);
+								console.log("LAIR", d.bibs[j][element]);
+								console.log("LAIR", d.bibs[j][element].length);
+								const array = d.bibs[j][element].slice(0, n);
 								console.log(array);
-								author_string = array.join(',');
-								author_string = author_string.slice(0,-1);
-								author_string += `...${d.bibs[j][element][d.bibs[j][element].length-1]}`;
-								var p = document.createElement('p');
-							   p.innerHTML = author_string;
-							   div.appendChild(p);
-								array.push(`...${d.bibs[j][element][d.bibs[j][element].length-1]}`);
-								var btn = document.createElement('button');
+								author_string = array.join(",");
+								author_string = author_string.slice(0, -1);
+								author_string += `...${d.bibs[j][element][d.bibs[j][element].length - 1]}`;
+								var p = document.createElement("p");
+								p.innerHTML = author_string;
+								div.appendChild(p);
+								array.push(
+									`...${d.bibs[j][element][d.bibs[j][element].length - 1]}`,
+								);
+								var btn = document.createElement("button");
 								btn.innerHTML = '""';
-								btn.style.backgroundColor = 'dodgerblue';
+								btn.style.backgroundColor = "dodgerblue";
 								btn.style.opacity = 0.7;
-								btn.style.color = 'white';
-								btn.style.border ='none';
-								btn.style.borderRadius = '4px';
-								bibs_list = bibs_list + author_string + '<br>' + btn;
+								btn.style.color = "white";
+								btn.style.border = "none";
+								btn.style.borderRadius = "4px";
+								bibs_list = bibs_list + author_string + "<br>" + btn;
+							} else {
+								var p = document.createElement("p");
+								p.innerHTML = d.bibs[j][element];
+								div.appendChild(p);
+								string = d.bibs[j][element].join(",");
+								bibs_list = bibs_list + d.bibs[j][element] + "<br>";
 							}
-							else{
-							   var p = document.createElement('p');
-							   p.innerHTML = d.bibs[j][element];
-							   div.appendChild(p);
-							   string = d.bibs[j][element].join(',');
-								bibs_list = bibs_list + d.bibs[j][element] + '<br>'
-
-							}
-
 						}
 					}
-					var btn = document.createElement('button');
-					btn.setAttribute('title', 'copy citation to clipboard');
+					var btn = document.createElement("button");
+					btn.setAttribute("title", "copy citation to clipboard");
 					btn.innerHTML = '<i class="far fa-copy"></i>';
-					btn.style.backgroundColor = 'dodgerblue';
-					btn.style.color = 'white';
-					 btn.style.opacity = 0.7;
-				   btn.style.border ='none';
-				   btn.style.borderRadius = '4px';
-				   btn.style.display = 'inline';
-				   btn.style.marginTop = '-12px';
-				   btn.style.marginBottom = '12px';
-				   btn.style.height = '15px';
-				   var temp = d.bibs[j];
-				   btn.setAttribute('class', `${temp.title}`);
-				   var temp1 = '';
-				   var string = ''
-				   var authors = temp.author;
-				   var author_list = [];
-				   for(let i = 0; i<authors.length; i++){
-					   let author = authors[i].split(" ");
-					   author = author[author.length-1] + "," + " " + author[0]
-					   //console.log(author);
-					   author_list.push(author);
-				   }
+					btn.style.backgroundColor = "dodgerblue";
+					btn.style.color = "white";
+					btn.style.opacity = 0.7;
+					btn.style.border = "none";
+					btn.style.borderRadius = "4px";
+					btn.style.display = "inline";
+					btn.style.marginTop = "-12px";
+					btn.style.marginBottom = "12px";
+					btn.style.height = "15px";
+					var temp = d.bibs[j];
+					btn.setAttribute("class", `${temp.title}`);
+					var temp1 = "";
+					var string = "";
+					var authors = temp.author;
+					var author_list = [];
+					for (let i = 0; i < authors.length; i++) {
+						let author = authors[i].split(" ");
+						author = author[author.length - 1] + "," + " " + author[0];
+						//console.log(author);
+						author_list.push(author);
+					}
 
-				   authors = author_list.join(" and ");
-					   var first_name = '';
-					   if (authors.length !== 0){
-						   var first_name = authors[0].split(" ")[authors[0].split(" ").length-1].toLowerCase();
-					   }
-					   var title = temp.title;
-					   var title_first_word = title.split(" ")[0].toLowerCase();
-					   var journal = temp.journal;
-					   var year = temp.pubyear.slice(0,-2);
-					   var volume = temp.volume;
-					   if(first_name == ''){
-							string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
-						   temp1 = string;
-					   }
-					   else{
+					authors = author_list.join(" and ");
+					var first_name = "";
+					if (authors.length !== 0) {
+						var first_name = authors[0]
+							.split(" ")
+							[authors[0].split(" ").length - 1].toLowerCase();
+					}
+					var title = temp.title;
+					var title_first_word = title.split(" ")[0].toLowerCase();
+					var journal = temp.journal;
+					var year = temp.pubyear.slice(0, -2);
+					var volume = temp.volume;
+					if (first_name == "") {
+						string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
+						temp1 = string;
+					} else {
 						string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  author={${authors}},\n  journal={${journal}},\n  year={${year}}}`;
-					   temp1= string;
-
-					   }
-				   div.appendChild(btn);
-				   var br = document.createElement('br');
-				   div.appendChild(br);
-				   div.appendChild(br);
-				   //add div with title, author and button to array of all divs
-				   citation_dict[temp.title] = string;
-				   //console.log(string);
-				   //console.log(`temp1${temp1}`);
-				   document_array.push(div);
-
-				}
-				else if(dataset_opt == 'NewsAPI'){
-					for (var element in d.bibs[j]){
-						if (element == 'journal'){
-							var p = document.createElement('p');
-							   p.innerHTML = d.bibs[j][element];
-							   div.appendChild(p);
-							   //string = d.bibs[j][element].join(',');
-							   bibs_list = bibs_list + d.bibs[j][element] + '<br>'
-						}
-						else if (element == 'author' || element == 'authors'){
-							if (d.bibs[j][element] == 'None') {
-							    d.bibs[j][element] = 'No Author Listed';
-							};
+						temp1 = string;
+					}
+					div.appendChild(btn);
+					var br = document.createElement("br");
+					div.appendChild(br);
+					div.appendChild(br);
+					//add div with title, author and button to array of all divs
+					citation_dict[temp.title] = string;
+					//console.log(string);
+					//console.log(`temp1${temp1}`);
+					document_array.push(div);
+				} 
+				else if (dataset_opt == "NewsAPI") {
+					for (var element in d.bibs[j]) {
+						if (element == "journal") {
+							var p = document.createElement("p");
+							p.innerHTML = d.bibs[j][element];
+							div.appendChild(p);
+							//string = d.bibs[j][element].join(',');
+							bibs_list = bibs_list + d.bibs[j][element] + "<br>";
+						} else if (element == "author" || element == "authors") {
+							if (d.bibs[j][element] == "None") {
+								d.bibs[j][element] = "No Author Listed";
+							}
 							//console.log("element is " + d.bibs[j][element] )
-							if(d.bibs[j][element].length == 0){
-							   var p = document.createElement('p');
-							   p.innerHTML = '<i> No authors listed<i/>';
-							   div.appendChild(p);
-							   bibs_list = bibs_list + '<i> No authors listed<i/>' + '<br>'
+							if (d.bibs[j][element].length == 0) {
+								var p = document.createElement("p");
+								p.innerHTML = "<i> No authors listed<i/>";
+								div.appendChild(p);
+								bibs_list = bibs_list + "<i> No authors listed<i/>" + "<br>";
+							} else {
+								var p = document.createElement("p");
+								p.innerHTML = d.bibs[j][element];
+								div.appendChild(p);
+								//string = d.bibs[j][element].join(',');
+								bibs_list = bibs_list + d.bibs[j][element] + "<br>";
 							}
-							else{
-							   var p = document.createElement('p');
-							   p.innerHTML = d.bibs[j][element];
-							   div.appendChild(p);
-							   //string = d.bibs[j][element].join(',');
-							   bibs_list = bibs_list + d.bibs[j][element] + '<br>'
-
-							}
-
 						}
 					}
-					var btn = document.createElement('button');
-					btn.setAttribute('title', 'copy citation to clipboard');
+					var btn = document.createElement("button");
+					btn.setAttribute("title", "copy citation to clipboard");
 					btn.innerHTML = '<i class="far fa-copy"></i>';
-					btn.style.backgroundColor = 'dodgerblue';
-					btn.style.color = 'white';
-					 btn.style.opacity = 0.7;
-				   btn.style.border ='none';
-				   btn.style.borderRadius = '4px';
-				   btn.style.display = 'inline';
-				   btn.style.marginTop = '-12px';
-				   btn.style.marginBottom = '12px';
-				   btn.style.height = '15px';
-				   var temp = d.bibs[j];
-				   btn.setAttribute('class', `${temp.title}`);
-				   var temp1 = '';
-				   var string = ''
-				   var authors = temp.author;
-				   var author_list = [];
-				   for(let i = 0; i<authors.length; i++){
-					   let author = authors[i].split(" ");
-					   author = author[author.length-1] + "," + " " + author[0]
-					   //console.log(author);
-					   author_list.push(author);
-				   }
+					btn.style.backgroundColor = "dodgerblue";
+					btn.style.color = "white";
+					btn.style.opacity = 0.7;
+					btn.style.border = "none";
+					btn.style.borderRadius = "4px";
+					btn.style.display = "inline";
+					btn.style.marginTop = "-12px";
+					btn.style.marginBottom = "12px";
+					btn.style.height = "15px";
+					var temp = d.bibs[j];
+					btn.setAttribute("class", `${temp.title}`);
+					var temp1 = "";
+					var string = "";
+					var authors = temp.author;
+					var author_list = [];
+					for (let i = 0; i < authors.length; i++) {
+						let author = authors[i].split(" ");
+						author = author[author.length - 1] + "," + " " + author[0];
+						//console.log(author);
+						author_list.push(author);
+					}
 
-				   authors = author_list.join(" and ");
-					   var first_name = '';
-					   if (authors.length !== 0){
-						   var first_name = authors[0].split(" ")[authors[0].split(" ").length-1].toLowerCase();
-					   }
-					   var title = temp.title;
-					   var title_first_word = title.split(" ")[0].toLowerCase();
-					   var journal = temp.journal;
-					   if (temp.pubyear != undefined) {
-					       var year = temp.pubyear.slice(0,-2);
-					   };
-					   var volume = temp.volume;
-					   if(first_name == ''){
-							string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
-						   temp1 = string;
-					   }
-					   else{
+					authors = author_list.join(" and ");
+					var first_name = "";
+					if (authors.length !== 0) {
+						var first_name = authors[0]
+							.split(" ")
+							[authors[0].split(" ").length - 1].toLowerCase();
+					}
+					var title = temp.title;
+					var title_first_word = title.split(" ")[0].toLowerCase();
+					var journal = temp.journal;
+					if (temp.pubyear != undefined) {
+						var year = temp.pubyear.slice(0, -2);
+					}
+					var volume = temp.volume;
+					if (first_name == "") {
+						string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
+						temp1 = string;
+					} else {
 						string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  author={${authors}},\n  journal={${journal}},\n  year={${year}}}`;
-					   temp1= string;
-
-					   }
-				   div.appendChild(btn);
-				   var br = document.createElement('br');
-				   div.appendChild(br);
-				   div.appendChild(br);
-				   //add div with title, author and button to array of all divs
-				   citation_dict[temp.title] = string;
-				   //console.log(string);
-				   //console.log(`temp1${temp1}`);
-				   document_array.push(div);
-
+						temp1 = string;
+					}
+					div.appendChild(btn);
+					var br = document.createElement("br");
+					div.appendChild(br);
+					div.appendChild(br);
+					//add div with title, author and button to array of all divs
+					citation_dict[temp.title] = string;
+					//console.log(string);
+					//console.log(`temp1${temp1}`);
+					document_array.push(div);
 				}
-				 // create citation button and style
-				 //if(author == undefined){
-					 //bibs_list = bibs_list + '<br>' + '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>' + d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>' + '</br>';
-				 //}else{
-					 //var ind = j+1
-					 //bibs_list = bibs_list + '<br>' + '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>' + d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>' + '</br>';
-				 //}
-			 }
-		 }
-		 //documents
-		 var container = document.getElementById("documentContainer");
-		 container.style.backgroundColor = 'rgb(244,244,244)'
-		if(dataset_opt !== 'PubMedAPI' && dataset_opt !== 'NewsAPI'){
-			container.innerHTML = '<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications</h3>' +
-																		'\n<p>'+bibs_list+'</p>';
-			console.log(container)
-      console.log(d.bibs[j].abstract)
-		}
+				else if (dataset_opt == "PostgreSQL") {
+					// console.log("PostgresSQL");
 
-		else{
-			var btn = document.createElement('button');
-			btn.setAttribute('id', 'citationButton');
+					// Create a div for each bib
+					var div = document.createElement("div");
+
+					// Display only the title and the HTML link
+					var title = d.bibs[j].title ?? "No Title Available"; // Use a fallback if the title is undefined
+					var html_link = d.bibs[j].html ?? "#"; // Use a fallback if the HTML link is undefined
+
+					// Create the title as a clickable link
+					var link = document.createElement("a");
+					link.setAttribute("href", html_link); // Set the href to the HTML link
+					link.setAttribute("target", "_blank"); // Open link in a new tab
+					link.innerHTML = title; // Set the title as the link text
+
+					// Append the link to the div
+					div.appendChild(link);
+
+					// Add the "Copy Citations" button
+					var btn = document.createElement("button");
+					btn.setAttribute("title", "Copy citation to clipboard");
+					btn.innerHTML = '<i class="far fa-copy"></i>'; // Copy icon
+					btn.style.backgroundColor = "dodgerblue";
+					btn.style.color = "white";
+					btn.style.opacity = 0.7;
+					btn.style.border = "none";
+					btn.style.borderRadius = "4px";
+					btn.style.display = "inline";
+					btn.style.marginLeft = "10px"; // Add some space between the link and button
+					btn.style.marginTop = "-12px";
+					btn.style.marginBottom = "12px";
+					btn.style.height = "15px";
+
+					// Create the citation text
+					var citation = `@article{${title.split(" ")[0].toLowerCase()},\n  title={${title}},\n  link={${html_link}}}`;
+					
+					// Add an event listener to copy the citation to clipboard when the button is clicked
+					btn.addEventListener("click", function () {
+						const el = document.createElement("textarea");
+						el.value = citation; // Set the citation text to the textarea
+						el.setAttribute("readonly", "");
+						el.style.position = "absolute";
+						el.style.left = "-9999px";
+						document.body.appendChild(el);
+						el.select();
+						document.execCommand("copy");
+						document.body.removeChild(el);
+						alert("Citation has been copied to clipboard");
+					});
+
+					// Append the copy button to the div
+					div.appendChild(btn);
+
+					// Optionally, add a break between links for readability
+					var br = document.createElement("br");
+					div.appendChild(br);
+
+					// Add div to the document array
+					document_array.push(div);
+
+					// Store citation in citation_dict for use with the copy button
+					citation_dict[title] = citation;
+				}
+			}
+		}
+		//documents
+		var container = document.getElementById("documentContainer");
+		container.style.backgroundColor = "rgb(244,244,244)";
+		// print the dataset
+		console.log("The dataset is " + dataset_opt);
+		if (dataset_opt !== "PubMedAPI" && dataset_opt !== "NewsAPI" && dataset_opt !== "PostgreSQL") {
+			// console.log("Not PubMedAPI or NewsAPI or PostgresSQL");
+			container.innerHTML =
+				'<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications</h3>' +
+				"\n<p>" +
+				bibs_list +
+				"</p>";
+			console.log(container);
+			console.log(d.bibs[j].abstract);
+		} 
+		else if (dataset_opt == "PostgreSQL") {
+			// console.log("PostgreSQL");
+			// print document array
+			// console.log(document_array);
+			var btn = document.createElement("button");
+			btn.setAttribute("id", "citationButton");
 			btn.innerHTML = '<i class="far fa-copy"></i> Copy Citations';
-			btn.style.backgroundColor = 'dodgerblue';
+			btn.style.backgroundColor = "dodgerblue";
 			btn.style.opacity = 0.7;
-			btn.style.color = 'white';
-			btn.style.border ='none';
-			btn.style.borderRadius = '4px';
-			btn.style.marginBottom = '25px';
-			btn.setAttribute('title', 'copy all citations to clipboard');
-			document.getElementById("documentContainer").innerHTML += '<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications </h3>';
-			// Add another button to 
+			btn.style.color = "white";
+			btn.style.border = "none";
+			btn.style.borderRadius = "4px";
+			btn.style.marginBottom = "25px";
+			btn.setAttribute("title", "copy all citations to clipboard");
+
+
+			document.getElementById("documentContainer").innerHTML +=
+				'<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications </h3>';
+			// Add another button to
 			document.getElementById("documentContainer").appendChild(btn);
-			var br = document.createElement('br');
+			var br = document.createElement("br");
+			document.getElementById("documentContainer").appendChild(br);
+
+			// Button to copy all citations
+			document.getElementById("citationButton").onclick = function () {
+				var citations = "";  // This will store all citations
+				for (let title in citation_dict) {
+					citations += citation_dict[title] + "\n\n"; // Concatenate each citation
+				}
+
+				// If citations are not empty, copy them to clipboard
+				if (citations) {
+					const el = document.createElement("textarea");
+					el.value = citations;
+					el.setAttribute("readonly", "");
+					el.style.position = "absolute";
+					el.style.left = "-9999px";  // Hide the textarea off-screen
+					document.body.appendChild(el);
+					el.select();
+					document.execCommand("copy");
+					document.body.removeChild(el);
+					alert("All citations have been copied to clipboard");
+				} else {
+					alert("No citations available to copy.");
+				}
+			};
+
+			//  createCitations("documentContainer", d);
+			// container.innerHTML += '\n<p>'+bibs_list+'</p>';
+			// add all divs with document information to container
+			for (let i = 0; i < document_array.length; i++) {
+				var temp = document_array[i]["childNodes"][2];
+				//console.log(document_array[i]);
+				temp.addEventListener("click", function () {
+					const el = document.createElement("textarea");
+					el.value = citation_dict[this.className];
+					el.setAttribute("readonly", "");
+					el.style.position = "absolute";
+					el.style.left = "-9999px";
+					document.body.appendChild(el);
+					el.select();
+					document.execCommand("copy");
+					document.body.removeChild(el);
+					alert("Citation has been copied to clipboard");
+				});
+				container.appendChild(document_array[i]);
+			
+			}
+		}
+		else {
+			// console.log("Not PubMedAPI or NewsAPI or PostgresSQL");
+			var btn = document.createElement("button");
+			btn.setAttribute("id", "citationButton");
+			btn.innerHTML = '<i class="far fa-copy"></i> Copy Citations';
+			btn.style.backgroundColor = "dodgerblue";
+			btn.style.opacity = 0.7;
+			btn.style.color = "white";
+			btn.style.border = "none";
+			btn.style.borderRadius = "4px";
+			btn.style.marginBottom = "25px";
+			btn.setAttribute("title", "copy all citations to clipboard");
+			document.getElementById("documentContainer").innerHTML +=
+				'<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications </h3>';
+			// Add another button to
+			document.getElementById("documentContainer").appendChild(btn);
+			var br = document.createElement("br");
 			document.getElementById("documentContainer").appendChild(br);
 			//  createCitations("documentContainer", d);
 			// container.innerHTML += '\n<p>'+bibs_list+'</p>';
 			// add all divs with document information to container
-			for(let i=0; i< document_array.length; i++){
-				var temp = document_array[i]['childNodes'][2];
+			for (let i = 0; i < document_array.length; i++) {
+				var temp = document_array[i]["childNodes"][2];
 				//console.log(document_array[i]);
-				temp.addEventListener('click', function(){
-					const el = document.createElement('textarea');
-						el.value = citation_dict[this.className];
-						el.setAttribute('readonly', '');
-						el.style.position = 'absolute';
-						el.style.left = '-9999px';
-						document.body.appendChild(el);
-						el.select();
-						document.execCommand('copy');
-						document.body.removeChild(el);
-						alert('Citation has been copied to clipboard')
-				})
+				temp.addEventListener("click", function () {
+					const el = document.createElement("textarea");
+					el.value = citation_dict[this.className];
+					el.setAttribute("readonly", "");
+					el.style.position = "absolute";
+					el.style.left = "-9999px";
+					document.body.appendChild(el);
+					el.select();
+					document.execCommand("copy");
+					document.body.removeChild(el);
+					alert("Citation has been copied to clipboard");
+				});
 				container.appendChild(document_array[i]);
 			}
 			//console.log(citation_dict);
 			// button to copy all citations
 			document.getElementById("citationButton").onclick = function () {
 				//console.log('copy');
-				document.execCommand('copy');
+				document.execCommand("copy");
 				var bibs_length = d.members.length;
-				var citations = '';
-				for (var j=0; j<bibs_length; j++){
+				var citations = "";
+				for (var j = 0; j < bibs_length; j++) {
 					var authors = d.bibs[j].author;
 					var author_list = [];
-					for(let i = 0; i<authors.length; i++){
+					for (let i = 0; i < authors.length; i++) {
 						let author = authors[i].split(" ");
-						author = author[author.length-1] + "," + " " + author[0]
+						author = author[author.length - 1] + "," + " " + author[0];
 						//console.log(author);
 						author_list.push(author);
 					}
 					authors = author_list.join(" and ");
-					var first_name = '';
-					if (authors.length !== 0){
-						var first_name = authors[0].split(" ")[authors[0].split(" ").length-1].toLowerCase();
+					var first_name = "";
+					if (authors.length !== 0) {
+						var first_name = authors[0]
+							.split(" ")
+							[authors[0].split(" ").length - 1].toLowerCase();
 					}
 					var title = d.bibs[j].title;
-          console.log(d.bibs[j].abstract)
+					console.log(d.bibs[j].abstract);
 					var title_first_word = title.split(" ")[0].toLowerCase();
 					var journal = d.bibs[j].journal;
-					var year = d.bibs[j].pubyear.slice(0,-2);
+					var year = d.bibs[j].pubyear.slice(0, -2);
 					var volume = d.bibs[j].volume;
-					if(first_name == ''){
+					if (first_name == "") {
 						var string1 = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
-					}
-					else{
-					var string1 = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  author={${authors}},\n  journal={${journal}},\n  year={${year}}}`;
-
+					} else {
+						var string1 = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  author={${authors}},\n  journal={${journal}},\n  year={${year}}}`;
 					}
 					string1 += "\n\n";
 					citations += string1;
-					const el = document.createElement('textarea');
+					const el = document.createElement("textarea");
 					el.value = citations;
-					el.setAttribute('readonly', '');
-					el.style.position = 'absolute';
-					el.style.left = '-9999px';
+					el.setAttribute("readonly", "");
+					el.style.position = "absolute";
+					el.style.left = "-9999px";
 					document.body.appendChild(el);
 					el.select();
-					document.execCommand('copy');
+					document.execCommand("copy");
 					document.body.removeChild(el);
 				}
-				alert('Citations have been copied to clipboard')
-			}
-
+				alert("Citations have been copied to clipboard");
+			};
 		}
 		// display mesh terms for current cluster
 		//const meshTerms = {{session['id2meshTerms']|tojson}}
 		//const meshTermString = meshTerms[d.id]
 		//document.getElementById("documentContainer").innerHTML += `<p style="color:black;opacity:0.75">${meshTermString}</p>`;
-		}
+	}
+
+
+	// function showDocuments(d){
+	// 	console.log('show Documents');
+	// 	var dataset_opt = urlParams.get('dataset_opt');
+	// 	 var bibs_list = '';
+	// 	 var bibs_length = d.members.length;
+	// 	 console.log("bibs="+bibs_length);
+	// 	 var document_array = [];
+	// 	 var uploaded_document_array = [];
+	// 	 var citation_dict = {};
+	// 	 for (var j=0; j<bibs_length; j++){
+	// 		 if(d.bibs[j].title == undefined){
+	// 			 //console.log("titles are undefined")
+	// 			 var ind = j+1;
+	// 			 bibs_list = '';
+	// 		 }else if (d.bibs[j].html == undefined){
+	// 			 //console.log("html is undefined")
+	// 			 var ind = j+1;
+	// 			 var pmid = d.bibs[j].pmid;
+	// 			 //console.log(d.bibs[j].author)
+	// 			 body_toshow = d.bibs[j].body_toshow;
+	// 			 if (pmid == undefined){
+	// 				 if (body_toshow != undefined){
+	// 					 //console.log("body_toshow is not undefined")
+	// 					 body_toshow = body_toshow.replace(/'/g, '_singlequote_');
+	// 					 body_toshow = body_toshow.replace(/"/g, '_doublequote_');
+	// 					 body_toshow = body_toshow.replace(/\n/g, ' _startinganewline_ ');
+	// 					 bibs_list = bibs_list + '<br>' + '<a href=# class = "text_link" id="text_link'+ind+'" onclick="show_uploaded_articles(\''+ body_toshow + '\',\'text_link'+ind+'\')" >' + d.bibs[j].title + '</a> <br>';
+	// 					 uploaded_document_array.push('<a href=# class = "text_link" id="text_link'+ind+'" onclick="show_uploaded_articles(\''+ body_toshow + '\',\'text_link'+ind+'\')" >' + d.bibs[j].title + '</a> <br>');
+	// 				 }else{
+	// 					 bibs_list = bibs_list + '<br>' + '<a href =' + '"https://www.ncbi.nlm.nih.gov/pubmed/?term=' + d.bibs[j].title + '%5Buid%5D" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank" >' + d.bibs[j].title + '</a> <br>'+ d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>'+ d.bibs[j].pdate + '<br>' + '</br>';
+	// 				 }
+	// 			 }else{
+	// 				 bibs_list = bibs_list + '<br>' + `<a href =` + '"https://www.ncbi.nlm.nih.gov/pubmed/?term=' + pmid + '%5Buid%5D" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank" >' + d.bibs[j].title + '</a> <br>'+ d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>'+ d.bibs[j].pdate + '<br>' + '</br>';
+	// 			 }
+	// 		 }else{
+	// 			bibs_list = bibs_list + '<br>' + '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>'
+    //     bibs_list = bibs_list + d.bibs[j].abstract + '<br>'
+	// 			//create div to put title, authors, and citation button in
+	// 			var div = document.createElement('div');
+	// 			var a = document.createElement('a');
+	// 			a.innerHTML = '\n';
+	// 			a.innerHTML += '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>';
+	// 			div.appendChild(a);
+	// 			let author_string = '';
+	// 			if(dataset_opt == 'PubMedAPI'){
+	// 				for (var element in d.bibs[j]){
+	// 					if (element == 'author' || element == 'authors'){
+	// 						//console.log("element is " + d.bibs[j][element] )
+	// 						if(d.bibs[j][element].length == 0){
+	// 						   var p = document.createElement('p');
+	// 						   p.innerHTML = '<i> No authors listed<i/>';
+	// 						   div.appendChild(p);
+	// 						   bibs_list = bibs_list + '<i> No authors listed<i/>' + '<br>'
+	// 						}
+	// 						else if(d.bibs[j][element].length > 5){
+	// 							var n = 5;
+	// 							console.log("LAIR",d.bibs[j][element]);
+	// 							console.log("LAIR",d.bibs[j][element].length);
+	// 							const array = d.bibs[j][element].slice(0,n);
+	// 							console.log(array);
+	// 							author_string = array.join(',');
+	// 							author_string = author_string.slice(0,-1);
+	// 							author_string += `...${d.bibs[j][element][d.bibs[j][element].length-1]}`;
+	// 							var p = document.createElement('p');
+	// 						   p.innerHTML = author_string;
+	// 						   div.appendChild(p);
+	// 							array.push(`...${d.bibs[j][element][d.bibs[j][element].length-1]}`);
+	// 							var btn = document.createElement('button');
+	// 							btn.innerHTML = '""';
+	// 							btn.style.backgroundColor = 'dodgerblue';
+	// 							btn.style.opacity = 0.7;
+	// 							btn.style.color = 'white';
+	// 							btn.style.border ='none';
+	// 							btn.style.borderRadius = '4px';
+	// 							bibs_list = bibs_list + author_string + '<br>' + btn;
+	// 						}
+	// 						else{
+	// 						   var p = document.createElement('p');
+	// 						   p.innerHTML = d.bibs[j][element];
+	// 						   div.appendChild(p);
+	// 						   string = d.bibs[j][element].join(',');
+	// 							bibs_list = bibs_list + d.bibs[j][element] + '<br>'
+
+	// 						}
+
+	// 					}
+	// 				}
+	// 				var btn = document.createElement('button');
+	// 				btn.setAttribute('title', 'copy citation to clipboard');
+	// 				btn.innerHTML = '<i class="far fa-copy"></i>';
+	// 				btn.style.backgroundColor = 'dodgerblue';
+	// 				btn.style.color = 'white';
+	// 				 btn.style.opacity = 0.7;
+	// 			   btn.style.border ='none';
+	// 			   btn.style.borderRadius = '4px';
+	// 			   btn.style.display = 'inline';
+	// 			   btn.style.marginTop = '-12px';
+	// 			   btn.style.marginBottom = '12px';
+	// 			   btn.style.height = '15px';
+	// 			   var temp = d.bibs[j];
+	// 			   btn.setAttribute('class', `${temp.title}`);
+	// 			   var temp1 = '';
+	// 			   var string = ''
+	// 			   var authors = temp.author;
+	// 			   var author_list = [];
+	// 			   for(let i = 0; i<authors.length; i++){
+	// 				   let author = authors[i].split(" ");
+	// 				   author = author[author.length-1] + "," + " " + author[0]
+	// 				   //console.log(author);
+	// 				   author_list.push(author);
+	// 			   }
+
+	// 			   authors = author_list.join(" and ");
+	// 				   var first_name = '';
+	// 				   if (authors.length !== 0){
+	// 					   var first_name = authors[0].split(" ")[authors[0].split(" ").length-1].toLowerCase();
+	// 				   }
+	// 				   var title = temp.title;
+	// 				   var title_first_word = title.split(" ")[0].toLowerCase();
+	// 				   var journal = temp.journal;
+	// 				   var year = temp.pubyear.slice(0,-2);
+	// 				   var volume = temp.volume;
+	// 				   if(first_name == ''){
+	// 						string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
+	// 					   temp1 = string;
+	// 				   }
+	// 				   else{
+	// 					string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  author={${authors}},\n  journal={${journal}},\n  year={${year}}}`;
+	// 				   temp1= string;
+
+	// 				   }
+	// 			   div.appendChild(btn);
+	// 			   var br = document.createElement('br');
+	// 			   div.appendChild(br);
+	// 			   div.appendChild(br);
+	// 			   //add div with title, author and button to array of all divs
+	// 			   citation_dict[temp.title] = string;
+	// 			   //console.log(string);
+	// 			   //console.log(`temp1${temp1}`);
+	// 			   document_array.push(div);
+
+	// 			}
+	// 			else if(dataset_opt == 'NewsAPI'){
+	// 				for (var element in d.bibs[j]){
+	// 					if (element == 'journal'){
+	// 						var p = document.createElement('p');
+	// 						   p.innerHTML = d.bibs[j][element];
+	// 						   div.appendChild(p);
+	// 						   //string = d.bibs[j][element].join(',');
+	// 						   bibs_list = bibs_list + d.bibs[j][element] + '<br>'
+	// 					}
+	// 					else if (element == 'author' || element == 'authors'){
+	// 						if (d.bibs[j][element] == 'None') {
+	// 						    d.bibs[j][element] = 'No Author Listed';
+	// 						};
+	// 						//console.log("element is " + d.bibs[j][element] )
+	// 						if(d.bibs[j][element].length == 0){
+	// 						   var p = document.createElement('p');
+	// 						   p.innerHTML = '<i> No authors listed<i/>';
+	// 						   div.appendChild(p);
+	// 						   bibs_list = bibs_list + '<i> No authors listed<i/>' + '<br>'
+	// 						}
+	// 						else{
+	// 						   var p = document.createElement('p');
+	// 						   p.innerHTML = d.bibs[j][element];
+	// 						   div.appendChild(p);
+	// 						   //string = d.bibs[j][element].join(',');
+	// 						   bibs_list = bibs_list + d.bibs[j][element] + '<br>'
+
+	// 						}
+
+	// 					}
+	// 				}
+	// 				var btn = document.createElement('button');
+	// 				btn.setAttribute('title', 'copy citation to clipboard');
+	// 				btn.innerHTML = '<i class="far fa-copy"></i>';
+	// 				btn.style.backgroundColor = 'dodgerblue';
+	// 				btn.style.color = 'white';
+	// 				 btn.style.opacity = 0.7;
+	// 			   btn.style.border ='none';
+	// 			   btn.style.borderRadius = '4px';
+	// 			   btn.style.display = 'inline';
+	// 			   btn.style.marginTop = '-12px';
+	// 			   btn.style.marginBottom = '12px';
+	// 			   btn.style.height = '15px';
+	// 			   var temp = d.bibs[j];
+	// 			   btn.setAttribute('class', `${temp.title}`);
+	// 			   var temp1 = '';
+	// 			   var string = ''
+	// 			   var authors = temp.author;
+	// 			   var author_list = [];
+	// 			   for(let i = 0; i<authors.length; i++){
+	// 				   let author = authors[i].split(" ");
+	// 				   author = author[author.length-1] + "," + " " + author[0]
+	// 				   //console.log(author);
+	// 				   author_list.push(author);
+	// 			   }
+
+	// 			   authors = author_list.join(" and ");
+	// 				   var first_name = '';
+	// 				   if (authors.length !== 0){
+	// 					   var first_name = authors[0].split(" ")[authors[0].split(" ").length-1].toLowerCase();
+	// 				   }
+	// 				   var title = temp.title;
+	// 				   var title_first_word = title.split(" ")[0].toLowerCase();
+	// 				   var journal = temp.journal;
+	// 				   if (temp.pubyear != undefined) {
+	// 				       var year = temp.pubyear.slice(0,-2);
+	// 				   };
+	// 				   var volume = temp.volume;
+	// 				   if(first_name == ''){
+	// 						string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
+	// 					   temp1 = string;
+	// 				   }
+	// 				   else{
+	// 					string = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  author={${authors}},\n  journal={${journal}},\n  year={${year}}}`;
+	// 				   temp1= string;
+
+	// 				   }
+	// 			   div.appendChild(btn);
+	// 			   var br = document.createElement('br');
+	// 			   div.appendChild(br);
+	// 			   div.appendChild(br);
+	// 			   //add div with title, author and button to array of all divs
+	// 			   citation_dict[temp.title] = string;
+	// 			   //console.log(string);
+	// 			   //console.log(`temp1${temp1}`);
+	// 			   document_array.push(div);
+
+	// 			}
+	// 			 // create citation button and style
+	// 			 //if(author == undefined){
+	// 				 //bibs_list = bibs_list + '<br>' + '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>' + d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>' + '</br>';
+	// 			 //}else{
+	// 				 //var ind = j+1
+	// 				 //bibs_list = bibs_list + '<br>' + '<a href ="' + d.bibs[j].html + '" onclick="return !window.open(this.href, \'somesite\', \'width=1000,height=700\')"target="_blank">' + d.bibs[j].title + '</a> <br>' + d.bibs[j].author + '<br>'+ d.bibs[j].journal + '<br>' + '</br>';
+	// 			 //}
+	// 		 }
+	// 	 }
+	// 	 //documents
+	// 	 var container = document.getElementById("documentContainer");
+	// 	 container.style.backgroundColor = 'rgb(244,244,244)'
+	// 	if(dataset_opt !== 'PubMedAPI' && dataset_opt !== 'NewsAPI'){
+	// 		container.innerHTML = '<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications</h3>' +
+	// 																	'\n<p>'+bibs_list+'</p>';
+	// 		console.log(container)
+    //   console.log(d.bibs[j].abstract)
+	// 	}
+
+	// 	else{
+	// 		var btn = document.createElement('button');
+	// 		btn.setAttribute('id', 'citationButton');
+	// 		btn.innerHTML = '<i class="far fa-copy"></i> Copy Citations';
+	// 		btn.style.backgroundColor = 'dodgerblue';
+	// 		btn.style.opacity = 0.7;
+	// 		btn.style.color = 'white';
+	// 		btn.style.border ='none';
+	// 		btn.style.borderRadius = '4px';
+	// 		btn.style.marginBottom = '25px';
+	// 		btn.setAttribute('title', 'copy all citations to clipboard');
+	// 		document.getElementById("documentContainer").innerHTML += '<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications </h3>';
+	// 		// Add another button to 
+	// 		document.getElementById("documentContainer").appendChild(btn);
+	// 		var br = document.createElement('br');
+	// 		document.getElementById("documentContainer").appendChild(br);
+	// 		//  createCitations("documentContainer", d);
+	// 		// container.innerHTML += '\n<p>'+bibs_list+'</p>';
+	// 		// add all divs with document information to container
+	// 		for(let i=0; i< document_array.length; i++){
+	// 			var temp = document_array[i]['childNodes'][2];
+	// 			//console.log(document_array[i]);
+	// 			temp.addEventListener('click', function(){
+	// 				const el = document.createElement('textarea');
+	// 					el.value = citation_dict[this.className];
+	// 					el.setAttribute('readonly', '');
+	// 					el.style.position = 'absolute';
+	// 					el.style.left = '-9999px';
+	// 					document.body.appendChild(el);
+	// 					el.select();
+	// 					document.execCommand('copy');
+	// 					document.body.removeChild(el);
+	// 					alert('Citation has been copied to clipboard')
+	// 			})
+	// 			container.appendChild(document_array[i]);
+	// 		}
+	// 		//console.log(citation_dict);
+	// 		// button to copy all citations
+	// 		document.getElementById("citationButton").onclick = function () {
+	// 			//console.log('copy');
+	// 			document.execCommand('copy');
+	// 			var bibs_length = d.members.length;
+	// 			var citations = '';
+	// 			for (var j=0; j<bibs_length; j++){
+	// 				var authors = d.bibs[j].author;
+	// 				var author_list = [];
+	// 				for(let i = 0; i<authors.length; i++){
+	// 					let author = authors[i].split(" ");
+	// 					author = author[author.length-1] + "," + " " + author[0]
+	// 					//console.log(author);
+	// 					author_list.push(author);
+	// 				}
+	// 				authors = author_list.join(" and ");
+	// 				var first_name = '';
+	// 				if (authors.length !== 0){
+	// 					var first_name = authors[0].split(" ")[authors[0].split(" ").length-1].toLowerCase();
+	// 				}
+	// 				var title = d.bibs[j].title;
+    //       console.log(d.bibs[j].abstract)
+	// 				var title_first_word = title.split(" ")[0].toLowerCase();
+	// 				var journal = d.bibs[j].journal;
+	// 				var year = d.bibs[j].pubyear.slice(0,-2);
+	// 				var volume = d.bibs[j].volume;
+	// 				if(first_name == ''){
+	// 					var string1 = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  journal={${journal}},\n  year={${year}}}`;
+	// 				}
+	// 				else{
+	// 				var string1 = `@article{${first_name}${year}${title_first_word},\n  title={${title}},\n  author={${authors}},\n  journal={${journal}},\n  year={${year}}}`;
+
+	// 				}
+	// 				string1 += "\n\n";
+	// 				citations += string1;
+	// 				const el = document.createElement('textarea');
+	// 				el.value = citations;
+	// 				el.setAttribute('readonly', '');
+	// 				el.style.position = 'absolute';
+	// 				el.style.left = '-9999px';
+	// 				document.body.appendChild(el);
+	// 				el.select();
+	// 				document.execCommand('copy');
+	// 				document.body.removeChild(el);
+	// 			}
+	// 			alert('Citations have been copied to clipboard')
+	// 		}
+
+	// 	}
+	// 	// display mesh terms for current cluster
+	// 	//const meshTerms = {{session['id2meshTerms']|tojson}}
+	// 	//const meshTermString = meshTerms[d.id]
+	// 	//document.getElementById("documentContainer").innerHTML += `<p style="color:black;opacity:0.75">${meshTermString}</p>`;
+	// 	}
 
 
 		function mouseout(d){
@@ -2214,6 +2628,7 @@ function citationGenerator(id){
 
 	function zoomOut() {
 		//console.log("back width: " + width)
+		// console.log("Going to zoom out");
 		var check = 0;
 		d3.selectAll(".bubble").each(function(){
 			if (this.style.filter != "url(\"#grayscale\")") {
@@ -2260,6 +2675,7 @@ function citationGenerator(id){
 		sessionData['state'] = state - 1
 		sessionData['id2members_'+String(state)] = undefined;
 		sessionData['cluster_desc_'+String(state)] = undefined;
+		sessionData['cluster_summary_'+String(state)] = undefined;
 		sessionData['xy_'+String(state)] = undefined;
 		sessionData['hue_'+String(state)] = undefined;
 		sessionData['satr_'+String(state)] = undefined;
@@ -2268,6 +2684,7 @@ function citationGenerator(id){
 
      	var cls = { 'id2freq': id2freq,
 				'desc': sessionData['cluster_desc_'+String(state-1)],
+				'summary': sessionData['cluster_summary_'+String(state-1)],
       	        'xy': sessionData['xy_'+String(state-1)],
       	        'hue': sessionData['hue_'+String(state-1)],
       	        'satr': sessionData['satr_'+String(state-1)],
@@ -2281,6 +2698,7 @@ function citationGenerator(id){
 		sessionStorage.setItem('sessionData', JSON.stringify(sessionData))
 		var new_data = generateNewData(data);
 		const current_level = current_selection_trace.decreaseLevel();
+		// console.log("Data to be zoomed out: " + JSON.stringify(new_data));
 		rerenderClusters(new_data, current_level);
 		d3.selectAll(".cover").each(function(d){
 			if (d.chosen == 1){
@@ -2305,16 +2723,42 @@ $(function() {
 		 $.post($SCRIPT_ROOT + '/_re_cluster', {
 			 sessionData: sessionStorage.getItem('sessionData')
 		 }).done(function(data) {
+			//  console.log("Entering renderNewClusters");
 			 let oldSessionData = sessionStorage.getItem('sessionData');
 			 //console.log(JSON.parse(oldSessionData))
 
 			 let newSessionData = data.newSessionData;
 			 //console.log(data)
 			 //console.log(newSessionData);
+			 // Console log the old session data
+			//  console.log("oldSessionData: " + oldSessionData);
+			//  console.log("oldSessionData.state: " + JSON.parse(oldSessionData).state);
+			 // Console log the new session data
+			//  console.log("newSessionData: " + newSessionData);
+			 // New session data has [object object] as its value, so we need to parse it to see the actual data
+			//  console.log("newSessionData: " + JSON.stringify(newSessionData));
+			 
+			//  console.log("newSessionData.state: " + newSessionData.state);
+			// display id2members for each state it is of the form id2members_0, id2members_1, id2members_2, etc till the last state
+			for (var i = 0; i <= newSessionData.state; i++) {	
+				// console.log("newSessionData.id2members_" + i + ": " + newSessionData["id2members_" + i]);	
+				// console.log("newSessionData.cluster_desc_" + i + ": " + newSessionData["cluster_desc_" + i]);
+				// console.log("newSessionData.cluster_summary_" + i + ": " + newSessionData["cluster_summary_" + i]);
+				// console.log("newSessionData.xy_" + i + ": " + newSessionData["xy_" + i]);
+				// console.log("newSessionData.hue_" + i + ": " + newSessionData["hue_" + i]);
+				// console.log("newSessionData.satr_" + i + ": " + newSessionData["satr_" + i]);
+				// console.log("newSessionData.edges_" + i + ": " + newSessionData["edges_" + i]);
+				
+			}	
 			 /* update session storage with updated data */
 			 sessionStorage.setItem('sessionData', JSON.stringify(newSessionData));
 			 //formatting the new data
 			 let new_data = generateNewData(data);
+			 // Print the new data and current level
+			//  console.log("new data: " + new_data);
+			//  console.log("current level: " + current_selection_trace.level);
+			 // Print that the data is ready
+			//  console.log("Data is ready");
 			 const current_level = current_selection_trace.increaseLevel();
 			 rerenderClusters(new_data, current_level);
 
@@ -2327,9 +2771,17 @@ $(function() {
 
 	}
 
+	// "desc":[[["Trump's","Election","Focus"]],[["Trump's","Legal","Battles"]],[["Debate","Highlights"]],[["Trump","Assassination","Attempts"]],[["Trump's","False","Claims"]],[["Trump","vs.","Endorsements"]],[["Trump","Rally","Security","Concerns"]],[["Trump","vs.","Harris","Debate"]],[["RFK","Jr.","Endorses","Trump"]],[["Late","Night","News"]]],"summary":[["Trump, Vance, and election concerns."],["Various legal issues involving Trump."],["Trump-Harris debate key takeaways and moments."],["Attempted attacks on Trump prompt Secret Service scrutiny."],["News about Trump's misleading statements and their repercussions."],["Political endorsements and controversies among Trump, RFK Jr., and Taylor Swift."],["Various news on Secret Service failures and rally incidents."],["Coverage on election debate dynamics."],["Robert F. Kennedy Jr. suspends campaign to endorse Trump."],["Late night shows' takes on debates, Trump, Musk, and Biden."]],
+
+	// "desc":{"0":["Trump","Legal","Battles"],"1":["RFK","Jr","vs.","Trump","in","North","Carolina"],"2":["RFK","Jr","Endorses","Trump"],"3":["Political","Maneuverings"],"4":["Trump's","Election","Prospects"],"5":["Kamala","Harris","Campaign","Focus"],"6":["US","Election","Updates"],"7":["Republican","Strategies","on","Women","Voters"],"8":["Election","Contingency","Planning"],"9":["Trump's","Expensive","Tax","Cuts"]},
+
 	function generateNewData(data) {
 	 	var new_data = [] ;
 		data_length = data.cls.desc.length ;
+		// console.log("generateNewData data: " + JSON.stringify(data));
+		// Get the data_length
+		// console.log("generateNewData data_length: " + data_length);
+		
 
 		for (var i = 0 ; i < data_length ; i++ ) {
 		    temp_obj = {};
@@ -2360,9 +2812,11 @@ $(function() {
 	}
 
 	function rerenderClusters(new_data, current_level) {
+		// Print which function is running
+		// console.log("reclustering ----> rerenderClusters is running");
+		// console.log("current level: " + current_level);
 
-
-		//console.log(new_data[0]);
+		// console.log("new data: "+new_data);
 		//remove the old svg
 		 d3.select("svg").remove();
 
@@ -2390,12 +2844,22 @@ $(function() {
 					 .attr("height",height)
 					 .attr("width", width);
 
-		 var dataset =  new_data;
+		var dataset =  new_data;
 
 	  	let count_list = dataset.map(data => data.count);
 	  	let mean_and_stddev = calc_mean_and_stddev(count_list);
 	  	let count_mean = mean_and_stddev["mean"];
 	  	let count_stddev = mean_and_stddev["stddev"];
+
+		// Print all the above information
+		// console.log("count_list: " + count_list);
+		// console.log("mean_and_stddev: " + mean_and_stddev);
+		// console.log("count_mean: " + count_mean);
+		// console.log("count_stddev: " + count_stddev);
+		// Print bubble chart data
+		// console.log("svg: " + svg);
+		// console.log("dataset: " + dataset);
+
 	  	for (let data of dataset) {
 	  		let diff = count_mean - data.count;
 	  		/* clusterSizeScore is the adjusted doc count that reduces the overall standard deviation of doc count of each cluster, which is used to decrease the difference between bubble sizes */
@@ -2522,28 +2986,6 @@ $(function() {
 				.attr("cy", 300)
 				.attr("r", function(d) { return d.actual_radius * min_resize_factor; })
 				.attr('pointer-events', 'none')
-				//.on('mouseover', function(d){d3.event.preventDefault(); mouseover(d, min_resize_factor); })
-				//.on('mousemove', function(){return (tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px"));})
-				//.on('mouseout', mouseout)
-//				.on('contextmenu', function(d){
-//					const selected_bibs = current_selection_trace.current_selected_bibs;
-//					if(selected_bibs.size>=zoom_in_threshold){
-//						if(current_selection_trace.level > 0) {
-//							var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Zoom out', 'Close Menu');
-//						} else {
-//							var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Close Menu');
-//						}
-//					}else{
-//						if(current_selection_trace.level > 0) {
-//							var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom out', 'Close Menu');
-//						} else {
-//							var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Close Menu');
-//						}
-//					}
-//					d3.event.preventDefault();
-//					//menu(d3.mouse(this)[0], d3.mouse(this)[1], d.id);
-//					menu(d.optimized_cx - d.actual_radius * min_resize_factor, d.optimized_cx + d.actual_radius * min_resize_factor, d.optimized_cy - 0.5 * d.actual_radius * min_resize_factor, d.id);
-//				})
 				.transition()
 				.attr("cx", function(d) { return d.optimized_cx; })
 				.attr("cy", function(d) { return d.optimized_cy; })
@@ -2569,50 +3011,61 @@ $(function() {
 				g.append(function(){return selection;});
 			})
 
-			//for(let i = 0; i< textLabels['_groups'][0].length; i++){
-			//	textLabels['_groups'][0][i].addEventListener('contextmenu', function(d){
-			//		const selected_bibs = current_selection_trace.current_selected_bibs;
-			//		if(selected_bibs.size>=zoom_in_threshold){
-			//			if(current_level > 0) {
-			//				var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Zoom out', 'Close Menu');
-			//			} else {
-			//				var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Close Menu');
-			//			}
-			//		}else{
-			//			if(current_level > 0) {
-			//				var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom out', 'Close Menu');
-			//			} else {
-			//				var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Close Menu');
-			//			}
-			//		}
-			//		d.preventDefault();
-			//		//menu(d['clientX']-1, d['clientY']-61, textLabels['_groups'][0][i].id);
-			//		menu(d.optimized_cx, d.optimized_cx + d.actual_radius * min_resize_factor, d.optimized_cy - 0.5 * d.actual_radius * min_resize_factor, d.id);
-			//	});
-			//}
-
-			//for(let i = 0; i<circle['_groups'][0].length; i++){
-			//	circle['_groups'][0][i].addEventListener('mouseover', mouseover);
-			//	circle['_groups'][0][i].addEventListener('mouseout', mouseout);
-			//}
 			//adding zoom feature
-			var zoom = d3.zoom()
-				// only scale up, e.g. between 1x and 50x
-				.scaleExtent([1, 10])
-				.on("zoom", function(){
-					var e = d3.event;
-					tx = Math.min(0, Math.max(e.transform.x, width - width * e.transform.k)),
-					ty = Math.min(0, Math.max(e.transform.y, height - height * e.transform.k));
-					g.attr('transform', [
-							"translate(" + [tx, ty] + ")",
-							"scale(" + e.transform.k + ")"
-				 ].join(" "));
-					texts.attr('transform', [
-							"translate(" + [tx, ty] + ")",
-							"scale(" + e.transform.k + ")"
-				 ].join(" "));
-				})
+			// var zoom = d3.zoom()
+			// 	// only scale up, e.g. between 1x and 50x
+			// 	.scaleExtent([1, 10])
+			// 	.on("zoom", function(){
+			// 		var e = d3.event;
+			// 		tx = Math.min(0, Math.max(e.transform.x, width - width * e.transform.k)),
+			// 		ty = Math.min(0, Math.max(e.transform.y, height - height * e.transform.k));
+			// 		g.attr('transform', [
+			// 				"translate(" + [tx, ty] + ")",
+			// 				"scale(" + e.transform.k + ")"
+			// 	 ].join(" "));
+			// 		texts.attr('transform', [
+			// 				"translate(" + [tx, ty] + ")",
+			// 				"scale(" + e.transform.k + ")"
+			// 	 ].join(" "));
+			// 	})
 				//svg.call(zoom);
+
+			
+			// Method 2
+
+			// // // Adding zoom feature
+			// // var baseFontSize = 12;  // Set this to your desired initial font size
+
+			// // // Adding zoom feature
+			// // var zoom = d3.zoom()
+			// // 	// Only scale up between 1x and 10x
+			// // 	.scaleExtent([1, 10])
+			// // 	.on("zoom", function(event){
+			// // 		var e = d3.event;
+
+			// // 		// Calculate translation limits based on zoom
+			// // 		var tx = Math.min(0, Math.max(e.transform.x, width - width * e.transform.k));
+			// // 		var ty = Math.min(0, Math.max(e.transform.y, height - height * e.transform.k));
+
+			// // 		// Apply zoom transformation to the bubbles
+			// // 		g.attr('transform', "translate(" + tx + "," + ty + ") scale(" + e.transform.k + ")");
+
+			// // 		// Apply only translation to the text (no scaling)
+			// // 		texts.attr('transform', "translate(" + tx + "," + ty + ")");
+
+			// // 		// Adjust font size based on zoom level
+			// // 		texts.style('font-size', function() {
+			// // 			return (baseFontSize / e.transform.k) + "px";  // Inversely scale the font size
+			// // 		});
+			// // 	});
+
+			// // Set initial text size explicitly
+			// texts.style('font-size', baseFontSize + "px");
+
+			// Attach the zoom behavior to the svg
+			// d3.select("svg").call(zoom);
+
+
 
 			d3.select(self.frameElement)
 					.style("height", height + "px");
@@ -2650,7 +3103,9 @@ $(function() {
 
 				//$(floater)
 
-		}
+	}
+
+
 //	let search_height = document.getElementById("query").style.height;
 //	console.log(search_height);
 //	document.getElementById("Explore").style.height=`${search_height}`;
@@ -2661,19 +3116,6 @@ $(function() {
 	//console.log(document.querySelectorAll('input')[0]);
 
 
-//	if(entity !== 'keywords' && entity!=='genes' && entity !== 'pharmacology'){
-//		marker.style.left= document.getElementById('pharmacology').offsetLeft + "px";
-//		console.log(marker.style.left);
-//		console.log(document.getElementById('pharmacology').innerHTML);
-//		const nameCapitalized = entity.charAt(0).toUpperCase() + entity.slice(1)
-//		console.log(nameCapitalized);
-//		document.getElementById('pharmacology').innerHTML = nameCapitalized;
-//		document.getElementById('pharmacology').setAttribute('onclick',`refreshEntity(${nameCapitalized})`);
-//		var li = document.createElement('li');
-//    	li.innerHTML = `<a href="#" id='pharmacology' class='dropdown_link' onClick="refreshEntity('pharmacology')" >Pharmacology</a>`;
-//    	document.getElementById('moreEntities').appendChild(li);
-//		//document.getElementById(`${entity}_li`).style.display='none';
-//	}
 	const regionsButton = document.getElementById('regions');
 	const moreButton = document.getElementById('more');
 	function moveIndicatorTo(e) {
@@ -2803,7 +3245,11 @@ $(document).ready(function() {
     {% endfor %}
 
 
-
+		// Add log
+	  console.log("Initial clustering being done");
+	//   console.log("dataset: " + JSON.stringify(dataset));
+	  // Print only the keys of the dataset
+	//   console.log("dataset keys: " + Object.keys(dataset));
 	  rerenderClusters(dataset, 0);
 
 
@@ -3027,114 +3473,28 @@ $(document).ready(function() {
         }
     }
 
-	// function rerenderTeX() {
-	// 	// Print log to console
-	// 	console.log("Rerendering TeX");
-	// 	const sessionData = JSON.parse(sessionStorage.getItem('sessionData'));
-	// 	// handle TeX tracking and rendering
-	// 	// use back tick here to allow quotation marks query to not interfere with the syntax
-	// 	var TeX = `\\text{Current query path: {{query|safe}}}`;
-	// 	// Print log to console
-	// 	console.log("Current query path: " + TeX);
-	// 	for (const level in current_selection_trace.ids) {
-	// 		// Print log to console
-	// 		console.log("Level: " + level);
-	// 		const cluster_desc = sessionData[`cluster_desc_${level}`];
-	// 		const cluster_summary = sessionData[`cluster_summary_${level}`];
-	// 		const cluster_ids = [...current_selection_trace.ids[level]]; // convert set to array
-	// 		// Print log to console
-	// 		console.log("Cluster IDs: " + cluster_ids);
-	// 		console.log("Cluster Description: " + cluster_desc[cluster_ids]);
-	// 		console.log("Cluster Summary: " + cluster_summary[cluster_ids]);
-	// 		if (cluster_ids.length == 0) { break; } // if nothing is selected, don't render any brackets
-	// 		TeX += "\\to\\left\\{\\begin{array}{ll}"; // left curly bracket; new array; left aligned
-	// 		if (level < current_selection_trace.level) { // display less information for previous levels
-	// 			if (level == current_selection_trace.level - 1 && current_selection_trace.ids[current_selection_trace.level].size == 0) {
-	// 				// if the current level has no selection, still display full information for the previous level
-	// 				for (const id of cluster_ids.slice(0, 5)) { // the first five elements on the first column
-	// 					const keywords = cluster_desc[id];
-	// 					const summary = cluster_summary[id];
-	// 					TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 				}
-	// 				if (cluster_ids.length > 5) {
-	// 					TeX += "\\end{array}\\middle|"; // right large pipe symbol
-	// 					TeX += "\\begin{array}{ll}"; // new array; left aligned
-	// 					for (const id of cluster_ids.slice(5)) { // elements after the fifth one on the second column
-	// 						const keywords = cluster_desc[id];
-	// 						const summary = cluster_summary[id];
-	// 						TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 					}
-	// 				}
-	// 			} else {
-	// 				for (const id of cluster_ids.slice(0, 5)) {
-	// 					const keywords = cluster_desc[id];
-	// 					const summary = cluster_summary[id];
-	// 					TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 					if (keywords.length > 2) {
-	// 						TeX += "... \\\\";
-	// 					} else {
-	// 						TeX += " \\\\";
-	// 					}
-	// 				}
-	// 				if (cluster_ids.length > 5) {
-	// 					TeX += "\\end{array}\\middle|"; // right large pipe symbol
-	// 					TeX += "\\begin{array}{ll}"; // new array; left aligned
-	// 					for (const id of cluster_ids.slice(5)) {
-	// 						const keywords = cluster_desc[id];
-	// 						const summary = cluster_summary[id];
-	// 						TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 						if (keywords.length > 2) {
-	// 							TeX += "... \\\\";
-	// 						} else {
-	// 							TeX += " \\\\";
-	// 						}
-	// 					}
-	// 				}
-	// 			}
-	// 		} else { // display full information for the current level
-	// 			for (const id of cluster_ids.slice(0, 5)) {
-	// 				const keywords = cluster_desc[id];
-	// 				const summary = cluster_summary[id];
-	// 				TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 			}
-	// 			if (cluster_ids.length > 5) {
-	// 				TeX += "\\end{array}\\middle|"; // right large pipe symbol
-	// 				TeX += "\\begin{array}{ll}"; // new array; left aligned
-	// 				for (const id of cluster_ids.slice(5)) {
-	// 					const keywords = cluster_desc[id];
-	// 					const summary = cluster_summary[id];
-	// 					TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 				}
-	// 			}
-	// 		}
-
-	// 		TeX += "\\end{array}\\right\\}"; // right curly bracket
-	// 	}
-
-	// 	katex.render(TeX, tex_node, {
-	// 		throwOnError: false,
-	// 		displayMode: true // Use display mode for better formatting
-	// 	});
-	// }
-
 	function rerenderTeX() {
-		console.log("Rerendering TeX");
+		// console.log("Rerendering TeX");
 		const sessionData = JSON.parse(sessionStorage.getItem('sessionData'));
-		var TeX = `\\text{Current query path: BLAH {{query|safe}}}`;
-		console.log("Current query path: " + TeX);
+		var TeX = `\\text{Current query path: {{query|safe}}}`;
+		// console.log("Current query path: " + TeX);
 		// current_selection_trace.ids
-		console.log("Current selection trace: ", current_selection_trace.ids);
+		// console.log("Current selection trace: ", current_selection_trace.ids);
+		// Print the state of the current selection trace
+		// console.log("Current selection trace level: ", current_selection_trace.level);
 		for (const level in current_selection_trace.ids) {
-			console.log("Level: " + level);
-			console.log("Cluster_desc: " + sessionData[`cluster_desc_${level}`]);
-			console.log("Cluster_summary: " + sessionData[`cluster_summary_${level}`]);
-			console.log("Cluster_ids: " + current_selection_trace.ids[level]);
+			// console.log("Level: " + level);
+			// console.log("Cluster_desc: " + sessionData[`cluster_desc_${level}`]);
+			// console.log("Cluster_summary: " + sessionData[`cluster_summary_${level}`]);
+			// console.log("Cluster_ids: " + current_selection_trace.ids[level]);
 			const cluster_desc = sessionData[`cluster_desc_${level}`];
 			const cluster_summary = sessionData[`cluster_summary_${level}`];
 			const cluster_ids = [...current_selection_trace.ids[level]];
-			console.log("Cluster IDs: " + cluster_ids);
-			console.log("Cluster Description: " + cluster_desc[cluster_ids]);
-			console.log("Cluster Summary: " + cluster_summary[cluster_ids]);
+			// cluster_ids is a object Set, so log it as an array
+			
+			// console.log("Cluster IDs: " + 
+			// console.log("Cluster Description: " + cluster_desc[cluster_ids]);
+			// console.log("Cluster Summary: " + cluster_summary[cluster_ids]);
 			if (cluster_ids.length == 0) { break; }
 			TeX += "\\to\\left\\{\\begin{array}{l}"; // single column for better readability
 			if (level < current_selection_trace.level) {
@@ -3173,6 +3533,9 @@ $(document).ready(function() {
 			TeX += "\\end{array}\\right\\}"; 
 		}
 
+		// Print the final TeX to console
+		// console.log("Final TeX: " + TeX);
+
 		// Render the TeX with improved formatting options
 		katex.render(TeX, tex_node, {
 			throwOnError: false,
@@ -3183,66 +3546,6 @@ $(document).ready(function() {
 			}
 		});
 	}
-
-
-	// function rerenderTeX() {
-	// 	// Print log to console
-	// 	console.log("Rerendering TeX");
-	// 	const sessionData = JSON.parse(sessionStorage.getItem('sessionData'));
-	// 	// handle TeX tracking and rendering
-	// 	// use back tick here to allow quotation marks query to not interfere with the syntax
-	// 	var TeX = `\\text{Current query path: BLAH {{query|safe}}}`;
-	// 	// Print log to console
-	// 	console.log("Current query path: " + TeX);
-	// 	for (const level in current_selection_trace.ids) {
-	// 		// Print log to console
-	// 		console.log("Level: " + level);
-	// 		const cluster_desc = sessionData[`cluster_desc_${level}`];
-	// 		const cluster_summary = sessionData[`cluster_summary_${level}`];
-	// 		const cluster_ids = [...current_selection_trace.ids[level]]; // convert set to array
-	// 		// Print log to console
-	// 		console.log("Cluster IDs: " + cluster_ids);
-	// 		console.log("Cluster Description: " + cluster_desc[cluster_ids]);
-	// 		console.log("Cluster Summary: " + cluster_summary[cluster_ids]);
-	// 		if (cluster_ids.length == 0) { break; } // if nothing is selected, don't render any brackets
-	// 		TeX += "\\to\\left\\{\\begin{array}{ll}"; // left curly bracket; new array; left aligned
-	// 		if (level < current_selection_trace.level) { // display less information for previous levels
-	// 			if (level == current_selection_trace.level - 1 && current_selection_trace.ids[current_selection_trace.level].size == 0) {
-	// 				// if the current level has no selection, still display full information for the previous level
-	// 				for (const id of cluster_ids) { // display all elements in a single column
-	// 					const keywords = cluster_desc[id];
-	// 					const summary = cluster_summary[id];
-	// 					TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 				}
-	// 			} else {
-	// 				for (const id of cluster_ids) {
-	// 					const keywords = cluster_desc[id];
-	// 					const summary = cluster_summary[id];
-	// 					TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 					if (keywords.length > 2) {
-	// 						TeX += "... \\\\";
-	// 					} else {
-	// 						TeX += " \\\\";
-	// 					}
-	// 				}
-	// 			}
-	// 		} else { // display full information for the current level
-	// 			for (const id of cluster_ids) {
-	// 				const keywords = cluster_desc[id];
-	// 				const summary = cluster_summary[id];
-	// 				TeX += `\\text{\\textbf{Cluster ${id}}:  ${summary} (Keywords: ${keywords.slice(0, 5).join(', ')})} \\\\`; // keywords inside curly brackets
-	// 			}
-	// 		}
-
-	// 		TeX += "\\end{array}\\right\\}"; // right curly bracket
-	// 	}
-
-	// 	katex.render(TeX, tex_node, {
-	// 		throwOnError: false,
-	// 		displayMode: true // Use display mode for better formatting
-	// 	});
-	// }
-
 
 
 

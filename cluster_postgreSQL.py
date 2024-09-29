@@ -1,6 +1,9 @@
 import psycopg2
 import pandas as pd
 from psycopg2.extras import RealDictCursor
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import matplotlib.pyplot as plt
 
 def execute_query(query, hostname, port, database, username, password):
     error = None
@@ -10,6 +13,11 @@ def execute_query(query, hostname, port, database, username, password):
     # database = 'PATTIE'
     # username = 'postgres'
     # password = 'Arvi1308'  # replace with your actual password
+    # hostname = '34.133.177.246'
+    # port = 5432
+    # database = 'rss_feed'
+    # username = 'aravind'
+    # password = 'C&99Fk6xHxypA2R$C4XQ'
     if query is None:
         error = "Query is empty"
         return [], error
@@ -92,3 +100,83 @@ def retrieve_from_postgresql(author_name):
         df = pd.DataFrame()
     
     return df, error
+
+# Function to search the database by keyword in title or description
+def search_database_by_keyword(keyword, 
+                                hostname = '34.133.177.246',
+                                port = 5432,
+                                database = 'rss_feed',
+                                username = 'aravind',
+                                password = 'C&99Fk6xHxypA2R$C4XQ'):
+    try:
+        # Connect to the database
+        connection = psycopg2.connect(host=hostname, port=port, dbname=database, user=username, password=password)
+        
+        # Create a cursor
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
+        
+        # Format the keyword for full-text search
+        formatted_keyword = ' & '.join(keyword.split())
+
+        # Execute the query
+        cursor.execute("""
+            SELECT * FROM rss_feed
+            WHERE to_tsvector('english', title || ' ' || description) @@ to_tsquery('english', %s);
+            """, (formatted_keyword,))
+        
+        # Fetch all the results
+        results = cursor.fetchall()
+
+        # Convert the results to a DataFrame
+        results = pd.DataFrame(results)
+        
+        # Close the cursor and connection
+        cursor.close()
+        connection.close()
+
+        return results, None
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return [], e
+    
+    
+def optimal_number_of_clusters(data, max_clusters=10):
+    """
+    Determine the optimal number of clusters using the Elbow method and silhouette score.
+    """
+    inertia = []
+    silhouette_scores = []
+    K = range(2, max_clusters+1)
+    
+    for k in K:
+        kmeans = KMeans(n_clusters=k)
+        kmeans.fit(data)
+        inertia.append(kmeans.inertia_)  # Sum of squared distances to the nearest cluster center
+        
+        # Calculate silhouette score only if k > 1
+        score = silhouette_score(data, kmeans.labels_)
+        silhouette_scores.append(score)
+
+    # Plot the elbow curve
+    plt.figure(figsize=(10, 6))
+    plt.plot(K, inertia, 'bo-', label='Inertia')
+    plt.xlabel('Number of clusters (k)')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Method')
+    plt.legend()
+    plt.show()
+
+    # Plot silhouette scores
+    plt.figure(figsize=(10, 6))
+    plt.plot(K, silhouette_scores, 'ro-', label='Silhouette Score')
+    plt.xlabel('Number of clusters (k)')
+    plt.ylabel('Silhouette Score')
+    plt.title('Silhouette Scores for different number of clusters')
+    plt.legend()
+    plt.show()
+
+    # Find the optimal number of clusters based on silhouette score
+    best_k = np.argmax(silhouette_scores) + 2  # because we started with k=2
+
+    return best_k

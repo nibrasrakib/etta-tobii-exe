@@ -1401,6 +1401,121 @@ def read_plaintext(path, uploaded_file, q, dataset, stopwords=[]):
     return docs, df, w2id, bibs
 
 
+# def read_df(dataframe, dataset, stopwords=[]):
+#     print("Reading dataframe...")
+#     doc_term_mat = []  # store documents
+#     df = dict()  # document frequency
+#     w2id = dict()
+#     cnt_w = 0
+#     bibs = []
+#     for index, row in dataframe.iterrows():
+#         string = ''
+#         bibs_dict = {}
+#         if 'pmid' in dataframe:
+#             pmid_ = str(row['pmid'])
+#             bibs_dict['pmid'] = pmid_
+#         if 'title' in dataframe:
+#             # print('title in dataframe')
+#             title_ = str(row['title'])
+#             bibs_dict['title'] = title_
+#             string = string + title_.lower() + ' '
+#         if 'author' in dataframe:
+#             # print('author in dataframe')
+#             author_ = str(row['author'])
+#             bibs_dict['author'] = author_
+#         if 'authors' in dataframe:
+#             # print('author in dataframe')
+#             author_ = row['authors']
+#             bibs_dict['author'] = author_
+#         if 'affiliations' in dataframe:
+#             # print('affiliation dataframe')
+#             affiliation_ = row['affiliations']
+#             bibs_dict['affiliations'] = affiliation_
+#         if 'source' in dataframe:
+#             source_ = str(row['source'])
+#             bibs_dict['journal'] = source_
+#         if 'abstract' in dataframe:
+#             # print('abstract in dataframe')
+#             abstract_ = str(row['abstract'])
+#             # TAG: for gene coverage testing
+#             bibs_dict['abstract'] = abstract_
+#             string = string + abstract_.lower() + ' '
+#         if 'description' in dataframe:
+#             # print("description in dataframe")
+#             description_ = str(row['description'])
+#         if 'snippet' in dataframe:
+#             # print("description in dataframe")
+#             description_ = str(row['snippet'])
+#             # bibs_dict['description']=description_
+#             string = string + description_.lower() + ' '
+#         if 'content' in dataframe:
+#             content_ = str(row['content'])
+#             # bibs_dict['content']=content_
+#             string = string + content_.lower() + ' '
+#         if 'url' in dataframe:
+#             url_ = str(row['url'])
+#             bibs_dict['html'] = url_
+#         if 'pubdate' in dataframe:
+#             pubdate_ = str(row['pubdate'])
+#             bibs_dict['pubdate'] = pubdate_
+#         if 'pubYear' in dataframe:
+#             pubYear_ = str(row['pubYear'])
+#             bibs_dict['pubYear'] = pubYear_
+#         if 'journal' in dataframe:
+#             journal_ = str(row['journal'])
+#             bibs_dict['journal'] = journal_
+#         if 'journal_abbrev' in dataframe:
+#             journalabbrev_ = str(row['journal_abbrev'])
+#             bibs_dict['journal_abbrev'] = journalabbrev_
+#         if 'volume' in dataframe:
+#             volume_ = str(row['volume'])
+#             bibs_dict['volume'] = volume_
+#         if 'issue' in dataframe:
+#             issue_ = str(row['issue'])
+#             bibs_dict['issue'] = issue_
+#         if 'doi' in dataframe:
+#             doi_ = str(row['doi'])
+#             bibs_dict['doi'] = doi_
+#         if 'pages' in dataframe:
+#             pages_ = str(row['pages'])
+#             bibs_dict['pages'] = pages_
+#         if 'meshHeadings' in dataframe:
+#             meshHeadings_ = row['meshHeadings']
+#             bibs_dict['meshHeadings'] = meshHeadings_
+
+#         bibs.append(bibs_dict)
+#         # print("bibs_dict")
+#         # print(bibs_dict)
+#         # print("string is")
+#         # print(string)
+#         terms = tokenize.split(string)
+
+#         # terms = [lemmatizer.lemmatize(w) for w in terms if w != '' and \
+#         #             w not in stopwords and \
+#         #             not exclude.match(w)]
+
+#         terms = [w for w in terms if w != '' and
+#                  w not in stopwords and
+#                  not exclude.match(w)]
+#         # count df
+#         for w in set(terms):
+#             if w in df:
+#                 df[w] += 1
+#             else:
+#                 df[w] = 1
+#                 w2id[w] = cnt_w
+#                 cnt_w += 1
+#         # count tf
+#         tf = dict()
+#         for w in terms:
+#             if w in tf:
+#                 tf[w] += 1
+#             else:
+#                 tf[w] = 1
+#         doc_term_mat.append(tf)
+
+#     return doc_term_mat, df, w2id, bibs
+
 def read_df(dataframe, dataset, stopwords=[]):
     print("Reading dataframe...")
     doc_term_mat = []  # store documents
@@ -1408,111 +1523,249 @@ def read_df(dataframe, dataset, stopwords=[]):
     w2id = dict()
     cnt_w = 0
     bibs = []
-    for index, row in dataframe.iterrows():
-        string = ''
-        bibs_dict = {}
-        if 'pmid' in dataframe:
-            pmid_ = str(row['pmid'])
-            bibs_dict['pmid'] = pmid_
-        if 'title' in dataframe:
-            # print('title in dataframe')
-            title_ = str(row['title'])
-            bibs_dict['title'] = title_
-            string = string + title_.lower() + ' '
-        if 'author' in dataframe:
-            # print('author in dataframe')
-            author_ = str(row['author'])
-            bibs_dict['author'] = author_
-        if 'authors' in dataframe:
-            # print('author in dataframe')
-            author_ = row['authors']
-            bibs_dict['author'] = author_
-        if 'affiliations' in dataframe:
-            # print('affiliation dataframe')
-            affiliation_ = row['affiliations']
-            bibs_dict['affiliations'] = affiliation_
-        if 'source' in dataframe:
-            source_ = str(row['source'])
-            bibs_dict['journal'] = source_
-        if 'abstract' in dataframe:
-            # print('abstract in dataframe')
-            abstract_ = str(row['abstract'])
-            # TAG: for gene coverage testing
-            bibs_dict['abstract'] = abstract_
-            string = string + abstract_.lower() + ' '
-        if 'description' in dataframe:
-            # print("description in dataframe")
-            description_ = str(row['description'])
-        if 'snippet' in dataframe:
-            # print("description in dataframe")
-            description_ = str(row['snippet'])
-            # bibs_dict['description']=description_
-            string = string + description_.lower() + ' '
-        if 'content' in dataframe:
-            content_ = str(row['content'])
-            # bibs_dict['content']=content_
-            string = string + content_.lower() + ' '
-        if 'url' in dataframe:
-            url_ = str(row['url'])
-            bibs_dict['html'] = url_
-        if 'pubdate' in dataframe:
-            pubdate_ = str(row['pubdate'])
-            bibs_dict['pubdate'] = pubdate_
-        if 'pubYear' in dataframe:
-            pubYear_ = str(row['pubYear'])
-            bibs_dict['pubYear'] = pubYear_
-        if 'journal' in dataframe:
-            journal_ = str(row['journal'])
-            bibs_dict['journal'] = journal_
-        if 'journal_abbrev' in dataframe:
-            journalabbrev_ = str(row['journal_abbrev'])
-            bibs_dict['journal_abbrev'] = journalabbrev_
-        if 'volume' in dataframe:
-            volume_ = str(row['volume'])
-            bibs_dict['volume'] = volume_
-        if 'issue' in dataframe:
-            issue_ = str(row['issue'])
-            bibs_dict['issue'] = issue_
-        if 'doi' in dataframe:
-            doi_ = str(row['doi'])
-            bibs_dict['doi'] = doi_
-        if 'pages' in dataframe:
-            pages_ = str(row['pages'])
-            bibs_dict['pages'] = pages_
-        if 'meshHeadings' in dataframe:
-            meshHeadings_ = row['meshHeadings']
-            bibs_dict['meshHeadings'] = meshHeadings_
+    if dataset == "PubMedAPI":
+        for index, row in dataframe.iterrows():
+            string = ''
+            bibs_dict = {}
+            if 'pmid' in dataframe:
+                pmid_ = str(row['pmid'])
+                bibs_dict['pmid'] = pmid_
+            if 'title' in dataframe:
+                # print('title in dataframe')
+                title_ = str(row['title'])
+                bibs_dict['title'] = title_
+                string = string + title_.lower() + ' '
+            if 'author' in dataframe:
+                # print('author in dataframe')
+                author_ = str(row['author'])
+                bibs_dict['author'] = author_
+            if 'authors' in dataframe:
+                # print('author in dataframe')
+                author_ = row['authors']
+                bibs_dict['author'] = author_
+            if 'affiliations' in dataframe:
+                # print('affiliation dataframe')
+                affiliation_ = row['affiliations']
+                bibs_dict['affiliations'] = affiliation_
+            if 'source' in dataframe:
+                source_ = str(row['source'])
+                bibs_dict['journal'] = source_
+            if 'abstract' in dataframe:
+                # print('abstract in dataframe')
+                abstract_ = str(row['abstract'])
+                # TAG: for gene coverage testing
+                bibs_dict['abstract'] = abstract_
+                string = string + abstract_.lower() + ' '
+            if 'description' in dataframe:
+                # print("description in dataframe")
+                description_ = str(row['description'])
+            if 'snippet' in dataframe:
+                # print("description in dataframe")
+                description_ = str(row['snippet'])
+                # bibs_dict['description']=description_
+                string = string + description_.lower() + ' '
+            if 'content' in dataframe:
+                content_ = str(row['content'])
+                # bibs_dict['content']=content_
+                string = string + content_.lower() + ' '
+            if 'url' in dataframe:
+                url_ = str(row['url'])
+                bibs_dict['html'] = url_
+            if 'pubdate' in dataframe:
+                pubdate_ = str(row['pubdate'])
+                bibs_dict['pubdate'] = pubdate_
+            if 'pubYear' in dataframe:
+                pubYear_ = str(row['pubYear'])
+                bibs_dict['pubYear'] = pubYear_
+            if 'journal' in dataframe:
+                journal_ = str(row['journal'])
+                bibs_dict['journal'] = journal_
+            if 'journal_abbrev' in dataframe:
+                journalabbrev_ = str(row['journal_abbrev'])
+                bibs_dict['journal_abbrev'] = journalabbrev_
+            if 'volume' in dataframe:
+                volume_ = str(row['volume'])
+                bibs_dict['volume'] = volume_
+            if 'issue' in dataframe:
+                issue_ = str(row['issue'])
+                bibs_dict['issue'] = issue_
+            if 'doi' in dataframe:
+                doi_ = str(row['doi'])
+                bibs_dict['doi'] = doi_
+            if 'pages' in dataframe:
+                pages_ = str(row['pages'])
+                bibs_dict['pages'] = pages_
+            if 'meshHeadings' in dataframe:
+                meshHeadings_ = row['meshHeadings']
+                bibs_dict['meshHeadings'] = meshHeadings_
 
-        bibs.append(bibs_dict)
-        # print("bibs_dict")
-        # print(bibs_dict)
-        # print("string is")
-        # print(string)
-        terms = tokenize.split(string)
+            bibs.append(bibs_dict)
+            # print("bibs_dict")
+            # print(bibs_dict)
+            # print("string is")
+            # print(string)
+            terms = tokenize.split(string)
 
-        # terms = [lemmatizer.lemmatize(w) for w in terms if w != '' and \
-        #             w not in stopwords and \
-        #             not exclude.match(w)]
+            # terms = [lemmatizer.lemmatize(w) for w in terms if w != '' and \
+            #             w not in stopwords and \
+            #             not exclude.match(w)]
 
-        terms = [w for w in terms if w != '' and
+            terms = [w for w in terms if w != '' and
+                    w not in stopwords and
+                    not exclude.match(w)]
+            # count df
+            for w in set(terms):
+                if w in df:
+                    df[w] += 1
+                else:
+                    df[w] = 1
+                    w2id[w] = cnt_w
+                    cnt_w += 1
+            # count tf
+            tf = dict()
+            for w in terms:
+                if w in tf:
+                    tf[w] += 1
+                else:
+                    tf[w] = 1
+            doc_term_mat.append(tf)
+
+    elif dataset == "postgres":
+        for index, row in dataframe.iterrows():
+            string = ''
+            bibs_dict = {}
+            
+            if 'paper_id' in dataframe and row['paper_id'] is not None and row['paper_id'] != '':
+                paper_id_ = str(row['paper_id'])
+                bibs_dict['paper_id'] = paper_id_
+
+            if 'title' in dataframe and row['title'] is not None and row['title'] != '':
+                title_ = str(row['title'])
+                bibs_dict['title'] = title_
+                string = string + title_.lower() + ' '
+
+            if 'authors' in dataframe and row['authors'] is not None and row['authors'] != '':
+                author_ = row['authors']
+                author_ = [a for a in author_]
+                bibs_dict['authors'] = author_
+
+            if 'abstract' in dataframe and row['abstract'] is not None and row['abstract'] != '':
+                abstract_ = str(row['abstract'])
+                bibs_dict['abstract'] = abstract_
+                string = string + abstract_.lower() + ' '
+
+            if 'url' in dataframe and row['url'] is not None and row['url'] != '':
+                url_ = str(row['url'])
+                bibs_dict['html'] = url_
+
+            if 'year' in dataframe and row['year'] is not None and row['year'] != '':
+                year_ = str(row['year'])
+                bibs_dict['year'] = year_
+
+            if 'venue' in dataframe and row['venue'] is not None and row['venue'] != '':
+                venue_ = str(row['venue'])
+                bibs_dict['venue'] = venue_
+
+            if 'citation_count' in dataframe and row['citation_count'] is not None and row['citation_count'] != '':
+                citation_count_ = str(row['citation_count'])
+                bibs_dict['citation_count'] = citation_count_
+
+            if 'fields_of_study' in dataframe and row['fields_of_study'] is not None and row['fields_of_study'] != '':
+                fields_of_study_ = row['fields_of_study']
+                fields_of_study_ = [f for f in fields_of_study_]
+                bibs_dict['fields_of_study'] = fields_of_study_
+
+            if 'reference_count' in dataframe and row['reference_count'] is not None and row['reference_count'] != '':
+                reference_count_ = str(row['reference_count'])
+                bibs_dict['reference_count'] = reference_count_
+
+            if 'influential_citation_count' in dataframe and row['influential_citation_count'] is not None and row['influential_citation_count'] != '':
+                influential_citation_count_ = str(row['influential_citation_count'])
+                bibs_dict['influential_citation_count'] = influential_citation_count_
+
+            if 'publication_types' in dataframe and row['publication_types'] is not None and row['publication_types'] != '':
+                publication_types_ = row['publication_types']
+                publication_types_ = [p for p in publication_types_]
+                bibs_dict['publication_types'] = publication_types_
+
+            if 'authors_ids' in dataframe and row['authors_ids'] is not None and row['authors_ids'] != '':
+                authors_ids_ = row['authors_ids']
+                authors_ids_ = [str(a) for a in authors_ids_]
+                bibs_dict['authors_ids'] = authors_ids_
+
+            bibs.append(bibs_dict)
+            # print("bibs_dict")
+            # print(bibs_dict)
+            # print("string is")
+            # print(string)
+            terms = tokenize.split(string)
+            
+            terms = [w for w in terms if w != '' and
                  w not in stopwords and
                  not exclude.match(w)]
-        # count df
-        for w in set(terms):
-            if w in df:
-                df[w] += 1
-            else:
-                df[w] = 1
-                w2id[w] = cnt_w
-                cnt_w += 1
-        # count tf
-        tf = dict()
-        for w in terms:
-            if w in tf:
-                tf[w] += 1
-            else:
-                tf[w] = 1
-        doc_term_mat.append(tf)
+            # count df
+            for w in set(terms):
+                if w in df:
+                    df[w] += 1
+                else:
+                    df[w] = 1
+                    w2id[w] = cnt_w
+                    cnt_w += 1
+            # count tf
+            tf = dict()
+            for w in terms:
+                if w in tf:
+                    tf[w] += 1
+                else:
+                    tf[w] = 1
+            doc_term_mat.append(tf)
+
+    elif dataset == "rss_feed":
+        for index, row in dataframe.iterrows():
+            string = ''
+            bibs_dict = {}
+
+            if 'title' in dataframe and row['title'] is not None and row['title'] != '':
+                title_ = str(row['title'])
+                bibs_dict['title'] = title_
+                string = string + title_.lower() + ' '
+
+            if 'description' in dataframe and row['description'] is not None and row['description'] != '':
+                description_ = row['description']
+                description_ = [a for a in description_]
+                bibs_dict['description'] = description_
+
+
+            if 'url' in dataframe and row['url'] is not None and row['url'] != '':
+                url_ = str(row['url'])
+                bibs_dict['html'] = url_
+
+            bibs.append(bibs_dict)
+            # print("bibs_dict")
+            # print(bibs_dict)
+            # print("string is")
+            # print(string)
+            terms = tokenize.split(string)
+            
+            terms = [w for w in terms if w != '' and
+                 w not in stopwords and
+                 not exclude.match(w)]
+            # count df
+            for w in set(terms):
+                if w in df:
+                    df[w] += 1
+                else:
+                    df[w] = 1
+                    w2id[w] = cnt_w
+                    cnt_w += 1
+            # count tf
+            tf = dict()
+            for w in terms:
+                if w in tf:
+                    tf[w] += 1
+                else:
+                    tf[w] = 1
+            doc_term_mat.append(tf)
 
     return doc_term_mat, df, w2id, bibs
 

@@ -34,11 +34,18 @@ class Config(object):
     # DC_DB_PORT = 5433
     # DC_DB_NAME = 'PATTIE'
     
+    # DC_DB_USER = 'aravind'
+    # DC_DB_PASS = 'C&99Fk6xHxypA2R$C4XQ'
+    # DC_DB_HOST = '34.133.177.246'
+    # DC_DB_PORT = 5432
+    # DC_DB_NAME = 'dcdi'
+    
     DC_DB_USER = 'aravind'
     DC_DB_PASS = 'C&99Fk6xHxypA2R$C4XQ'
     DC_DB_HOST = '34.133.177.246'
     DC_DB_PORT = 5432
-    DC_DB_NAME = 'dcdi'
+    DC_DB_NAME = 'rss_feed'
+    
     
 
     DB_CONFIG = {

@@ -36,7 +36,7 @@
     	document.addEventListener("DOMContentLoaded", function () {
     		const element = document.getElementById("math-tex");
     		// use back tick here to allow quotation marks query to not interfere with the syntax
-    		const TeX = `\\text{Current query path: HMM {{query|safe}}}`;
+    		const TeX = `\\text{Current query path: {{query|safe}}}`;
     		if (element) {
         		katex.render(TeX, element, {
             		throwOnError: false,
