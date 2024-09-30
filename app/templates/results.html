@@ -23,7 +23,7 @@
 	document.getElementById("pattieword").style="position: fixed; top: 0px; left: 50%; transform: translate(-50%, 0%); color: #62b2ff";
 	// document.getElementById("copyright").style= "position: fixed; top:12%; left: 16%; width: 10vw";
 	// Make the copyright in the bottom right with symbol even if it overlaps
-	document.getElementById("copyright").style= "position: fixed; bottom: 0px; right: 0px; width: 10vw";
+	document.getElementById("copyright").style= "position: fixed; bottom: 0px; right: 0px; width: 10vw display: none";
 	document.getElementsByClassName("page")[0].style="height:90%";
 	//console.log(document.getElementsByClassName("page")[0].style);
 	document.getElementById("home_link").style.display="inline-block";
@@ -1410,7 +1410,7 @@ function citationGenerator(id){
 
 
 			document.getElementById("documentContainer").innerHTML +=
-				'<h3 style="color:#4c6d92;opacity:0.75">Clustered Publications </h3>';
+				'<h3 style="color:#4c6d92;opacity:0.75">Clustered Articles </h3>';
 			// Add another button to
 			document.getElementById("documentContainer").appendChild(btn);
 			var br = document.createElement("br");
