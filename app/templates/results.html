@@ -18,8 +18,12 @@
 //	document.getElementsByClassName("text_link")[0].style="margin-right: 21vw;";
 //	document.getElementsByClassName("top-container")[0].style.marginRight="20vw";
 	document.getElementById("main_heading").style="magin:10px; text-align:left; ";
-	document.getElementById("pattieword").style.paddingLeft = "3vw";
-	document.getElementById("copyright").style= "position: fixed; top:12%; left: 16%; width: 10vw";
+	// document.getElementById("pattieword").style.paddingLeft = "3vw";
+	// Make the pattiword in the top center fixed position
+	document.getElementById("pattieword").style="position: fixed; top: 0px; left: 50%; transform: translate(-50%, 0%); color: #62b2ff";
+	// document.getElementById("copyright").style= "position: fixed; top:12%; left: 16%; width: 10vw";
+	// Make the copyright in the bottom right with symbol even if it overlaps
+	document.getElementById("copyright").style= "position: fixed; bottom: 0px; right: 0px; width: 10vw";
 	document.getElementsByClassName("page")[0].style="height:90%";
 	//console.log(document.getElementsByClassName("page")[0].style);
 	document.getElementById("home_link").style.display="inline-block";
@@ -50,13 +54,13 @@ if (dataset_opt != 'PubMedAPI' && dataset_opt != 'Experts'){
 		entities_menu.style.opacity = 0;
 	}
 }
-else if (dataset_opt == 'DigiSquare'){
+// else if (dataset_opt == 'DigiSquare'){
 
-  const entities_menu = document.getElementById('entities_menu');
-	if (entities_menu) {
-		entities_menu.style.opacity = 0;
-	}
-}
+//   const entities_menu = document.getElementById('entities_menu');
+// 	if (entities_menu) {
+// 		entities_menu.style.opacity = 0;
+// 	}
+// }
 // else if (dataset_opt == 'rss_feed'){
 // 	const entities_menu = document.getElementById('entities_menu');
 // 	if (entities_menu) {
@@ -388,7 +392,7 @@ function VoiceEdges(cluster) {
 							.attr("x", midX)
 							.attr("y", midY)
 							.attr("opacity", 0)//.transition().duration(250).attr("opacity", 0.75)
-							.attr("fill", "DodgerBlue")
+							.attr("fill", "#4c6d92")
 							.attr("font-size", 14)
 							.text(edges[pair].distance)
 							.on("mouseover",function(){
@@ -437,7 +441,7 @@ function VoiceEdges(cluster) {
 							.attr("x", midX)
 							.attr("y", midY)
 							.attr("opacity", 0)//.transition().duration(250).attr("opacity", 0.75)
-							.attr("fill", "DodgerBlue")
+							.attr("fill", "#4c6d92")
 							.attr("font-size", 12)
 							.text(edges[pair].distance)
 							.on("mouseover",function(){
@@ -488,7 +492,7 @@ function VoiceEdges(cluster) {
 							.attr("x", midX)
 							.attr("y", midY)
 							.attr("opacity", 0)//.transition().duration(250).attr("opacity", 0.75)
-							.attr("fill", "DodgerBlue")
+							.attr("fill", "#4c6d92")
 							.attr("font-size", 10)
 							.text(edges[pair].distance)
 							.on("mouseover",function(){
@@ -575,7 +579,7 @@ function VoiceEdges(cluster) {
 								.attr("x", midX)
 								.attr("y", midY)
 								.attr("opacity", 0)//.transition().duration(250).attr("opacity", 0.75)
-								.attr("fill", "DodgerBlue")
+								.attr("fill", "#4c6d92")
 								.attr("font-size", 14)
 								.text(edges[pair].distance)
 								.on("mouseover",function(){
@@ -626,7 +630,7 @@ function VoiceEdges(cluster) {
 								.attr("x", midX)
 								.attr("y", midY)
 								.attr("opacity", 0)//.transition().duration(250).attr("opacity", 0.75)
-								.attr("fill", "DodgerBlue")
+								.attr("fill", "#4c6d92")
 								.attr("font-size", 12)
 								.text(edges[pair].distance)
 								.on("mouseover",function(){
@@ -679,7 +683,7 @@ function VoiceEdges(cluster) {
 								.attr("x", midX)
 								.attr("y", midY)
 								.attr("opacity", 0)//.transition().duration(250).attr("opacity", 0.75)
-								.attr("fill", "DodgerBlue")
+								.attr("fill", "#4c6d92")
 								.attr("font-size", 10)
 								.text(edges[pair].distance)
 								.on("mouseover",function(){
@@ -1156,7 +1160,7 @@ function citationGenerator(id){
 								);
 								var btn = document.createElement("button");
 								btn.innerHTML = '""';
-								btn.style.backgroundColor = "dodgerblue";
+								btn.style.backgroundColor = "#4c6d92";
 								btn.style.opacity = 0.7;
 								btn.style.color = "white";
 								btn.style.border = "none";
@@ -1174,7 +1178,7 @@ function citationGenerator(id){
 					var btn = document.createElement("button");
 					btn.setAttribute("title", "copy citation to clipboard");
 					btn.innerHTML = '<i class="far fa-copy"></i>';
-					btn.style.backgroundColor = "dodgerblue";
+					btn.style.backgroundColor = "#4c6d92";
 					btn.style.color = "white";
 					btn.style.opacity = 0.7;
 					btn.style.border = "none";
@@ -1255,7 +1259,7 @@ function citationGenerator(id){
 					var btn = document.createElement("button");
 					btn.setAttribute("title", "copy citation to clipboard");
 					btn.innerHTML = '<i class="far fa-copy"></i>';
-					btn.style.backgroundColor = "dodgerblue";
+					btn.style.backgroundColor = "#4c6d92";
 					btn.style.color = "white";
 					btn.style.opacity = 0.7;
 					btn.style.border = "none";
@@ -1331,7 +1335,7 @@ function citationGenerator(id){
 					var btn = document.createElement("button");
 					btn.setAttribute("title", "Copy citation to clipboard");
 					btn.innerHTML = '<i class="far fa-copy"></i>'; // Copy icon
-					btn.style.backgroundColor = "dodgerblue";
+					btn.style.backgroundColor = "#4c6d92";
 					btn.style.color = "white";
 					btn.style.opacity = 0.7;
 					btn.style.border = "none";
@@ -1382,7 +1386,7 @@ function citationGenerator(id){
 		if (dataset_opt !== "PubMedAPI" && dataset_opt !== "NewsAPI" && dataset_opt !== "PostgreSQL") {
 			// console.log("Not PubMedAPI or NewsAPI or PostgresSQL");
 			container.innerHTML =
-				'<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications</h3>' +
+				'<h3 style="color:#4c6d92;opacity:0.75">Clustered Publications</h3>' +
 				"\n<p>" +
 				bibs_list +
 				"</p>";
@@ -1396,7 +1400,7 @@ function citationGenerator(id){
 			var btn = document.createElement("button");
 			btn.setAttribute("id", "citationButton");
 			btn.innerHTML = '<i class="far fa-copy"></i> Copy Citations';
-			btn.style.backgroundColor = "dodgerblue";
+			btn.style.backgroundColor = "#4c6d92";
 			btn.style.opacity = 0.7;
 			btn.style.color = "white";
 			btn.style.border = "none";
@@ -1406,7 +1410,7 @@ function citationGenerator(id){
 
 
 			document.getElementById("documentContainer").innerHTML +=
-				'<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications </h3>';
+				'<h3 style="color:#4c6d92;opacity:0.75">Clustered Publications </h3>';
 			// Add another button to
 			document.getElementById("documentContainer").appendChild(btn);
 			var br = document.createElement("br");
@@ -1463,7 +1467,7 @@ function citationGenerator(id){
 			var btn = document.createElement("button");
 			btn.setAttribute("id", "citationButton");
 			btn.innerHTML = '<i class="far fa-copy"></i> Copy Citations';
-			btn.style.backgroundColor = "dodgerblue";
+			btn.style.backgroundColor = "#4c6d92";
 			btn.style.opacity = 0.7;
 			btn.style.color = "white";
 			btn.style.border = "none";
@@ -1471,7 +1475,7 @@ function citationGenerator(id){
 			btn.style.marginBottom = "25px";
 			btn.setAttribute("title", "copy all citations to clipboard");
 			document.getElementById("documentContainer").innerHTML +=
-				'<h3 style="color:DodgerBlue;opacity:0.75">Clustered Publications </h3>';
+				'<h3 style="color:#4c6d92;opacity:0.75">Clustered Publications </h3>';
 			// Add another button to
 			document.getElementById("documentContainer").appendChild(btn);
 			var br = document.createElement("br");
@@ -1951,7 +1955,7 @@ function citationGenerator(id){
 							 .attr("style", "margin-top:45%; z-index:99; position: absolute")
 							 .style("visibility","hidden")
 							 .style("border-collapse", "collapse")// <= Add this line in
-							 .style("border", "2px DodgerBlue solid"), // <= Add this line in
+							 .style("border", "2px #4c6d92 solid"), // <= Add this line in
 					 thead = table.append("thead"),
 					 tbody = table.append("tbody");
 
@@ -1961,7 +1965,7 @@ function citationGenerator(id){
 					 .data(columns)
 					 .enter()
 					 .append("th")
-					 .attr("style", "font-family: Courier; color: DodgerBlue; font-size: 11") // sets the font style
+					 .attr("style", "font-family: Courier; color: #4c6d92; font-size: 11") // sets the font style
 					 .text(function(column) { return column; });
 
 			 // create a row for each object in the data
@@ -1979,7 +1983,7 @@ function citationGenerator(id){
 					 })
 					 .enter()
 					 .append("td")
-					 .attr("style", "font-family: Courier; color: DodgerBlue; font-size: 11") // sets the font style
+					 .attr("style", "font-family: Courier; color: #4c6d92; font-size: 11") // sets the font style
 					 .html(function(d) { return d.value; });
 
 			 return table;
@@ -2049,7 +2053,7 @@ function citationGenerator(id){
 												})
 												.attr("width", 300)
 												.attr("height", 400)
-												.style("background-color", "rgb(244,244,244)")
+												.style("background-color", "#4c6d92")
 												.style("border", "solid")
 												.style("border-color", "lightgrey")
 												.style("padding", "5px")
@@ -2197,7 +2201,7 @@ function citationGenerator(id){
                               })
 							 .attr('dy', height - margin / 2 - 2)
 							 .attr('dx', margin)
-							 .attr('style', 'fill: dodgerblue; font-size: 13')
+							 .attr('style', 'fill: #4c6d92; font-size: 13')
 							.transition()
 							.attr("x", x2 + menu_text_forward_padding_length)
                              .attr('y', function(d, i){
@@ -3265,9 +3269,17 @@ $(document).ready(function() {
 	<div id="cluster" class="cluster" style="z-index: 0;">
 		<div class="bubbleChart" id="tabs-cluster"></div>
 	</div>
-	<nav id="entities_menu"
-		style="background-color: dodgerblue; opacity: 0.7; margin-left: 8px; padding: 10px; border-radius: 5px; position: fixed; z-index: 1;">
-		<div id="marker" style="width:47px"></div>
+	<!-- <nav id="entities_menu" style="background-color: dodgerblue; opacity: 0.7; margin-left: 8px; padding: 10px; border-radius: 5px; position: fixed; z-index: 1;"> -->
+	<!-- Make the entities_menu invisible -->
+	{% if dataset != 'PubMedAPI' %}
+	 <style>
+		#entities_menu {
+			opacity: 0 !important;
+		}
+	 </style>
+	{% endif %}
+	<nav id="entities_menu" style="background-color: #4c6d92; opacity: 0.7; margin-left: 8px; padding: 10px; border-radius: 5px; position: fixed; z-index: 1;">
+		<!-- <div id="marker" style="width:47px"></div> -->
 		{% if dataset == 'PubMedAPI' %}
 		<a href="#" id='keywords' onClick="refreshEntity('keywords')">Keywords</a>
 		<a href="#" id='authors' onClick="refreshEntity('authors')">Authors</a>
@@ -3277,44 +3289,6 @@ $(document).ready(function() {
 		{% elif dataset == 'DigiSquare' %}
 		<a href="#" id='topics' onClick="refreshEntity('topics')">Topics</a>
 		{% endif %}
-
-		<!-- <a href="#" id='genes' onClick="refreshEntity('genes')" >Genes</a> -->
-		<!--
-		<a href="#" id='pharmacology' onClick="refreshEntity('pharmacology')" >Pharmacology</a>
-			<div id="regions" style="display: inline-block; padding-left: 0px; z-index: 1;" class="library-dropdown">
-				<a  href="#" id="regions-button">Regions</a>
-				<ul class="library-menu" id="regions-ul" style="width:150px; background-color: dodgerblue;">
-					<li id="africa_li"><a href="#" class="dropdown_link" id='africa' onClick="refreshEntity('africa')" >Africa</a></li>
-					<li id="americas_li"><a href="#" class="dropdown_link" id='americas' onClick="refreshEntity('americas')" >Americas</a></li>
-					<li id="antarctic_regions_li"><a href="#" class="dropdown_link" id='antarctic_regions' onClick="refreshEntity('antarctic_regions')" >Antarctic Regions</a></li>
-					<li id="arctic_regions_li"><a href="#" class="dropdown_link" id='arctic_regions' onClick="refreshEntity('arctic_regions')" >Arctic Regions</a></li>
-					<li id="asia_li"><a href="#" class="dropdown_link" id='asia' onClick="refreshEntity('asia')" >Asia</a></li>
-					<li id="europe_li"><a href="#" class="dropdown_link" id='europe' onClick="refreshEntity('europe')" >Europe</a></li>
-				</ul>
-			</div>
-
-
-
-			<div id="more" style="display: inline-block; padding-left: 0px; z-index: 1;" class="library-dropdown">
-				<a  href="#" id="more-button"><span>&#8942;</span>  More</a>
-				<ul class="library-menu" id="more-entities-ul" style="width:150px;background-color: dodgerblue;">
-					<li id="treatment_li"><a href="#" class="dropdown_link" id='treatment' onClick="refreshEntity('treatment')" >Treatment</a></li>
-					<li id="epidemiology_li"><a href="#" class="dropdown_link" id='epidemiology' onClick="refreshEntity('epidemiology')" >Epidemiology</a></li>
-					<li id="anthropology_li"><a href="#" class="dropdown_link" id='anthropology' onClick="refreshEntity('anthropology')" >Anthropology</a></li>
-					<li id="methods_li"><a href="#" class="dropdown_link" id='methods' onClick="refreshEntity('methods')" >Methods</a></li>
-					<li id="education_li"><a href="#" class="dropdown_link" id='education' onClick="refreshEntity('education')" >Education</a></li>
-					<li id="economics_li"><a href="#" class="dropdown_link" id='economics' onClick="refreshEntity('economics')" >Economics</a></li>
-					<li id="history_li"><a href="#" class="dropdown_link" id='history' onClick="refreshEntity('history')" >History</a></li>
-					<li id="trends_li"><a href="#" class="dropdown_link" id='trends' onClick="refreshEntity('trends')" >Trends</a></li>
-					<li id="authors_li"><a href="#" class="dropdown_link" id='authors' onClick="refreshEntity('authors')" >Authors</a></li>
-					<li id="diseases_li"><a href="#" class="dropdown_link" id='diseases' onClick="refreshEntity('diseases')" >Diseases</a></li>
-					<li id="drugs_li"><a href="#" class="dropdown_link" id='drugs' onClick="refreshEntity('drugs')" >Drugs</a></li>
-				</ul>
-			</div>
-
-
-
-			-->
 	</nav>
 	<form class="searchBar" name="Go" action="" method="POST" enctype="multipart/form-data" id="usrform">
 		<!-- change input to value="{{ query }}" for non-voice -->
@@ -3353,7 +3327,7 @@ $(document).ready(function() {
 	</form>
 
 	<div id="loading">
-		<h2 style="font-size: 25px;">PATTIE IS RETRIEVING YOUR RESULTS</h2>
+		<h2 style="font-size: 25px;">ShowMe.news IS RETRIEVING YOUR RESULTS</h2>
 		<div class="loader"></div>
 	</div>
 </div>
@@ -3362,10 +3336,10 @@ $(document).ready(function() {
 <div id="footer" style="position:fixed; bottom:15px; width:100%; display: flex; flex-direction: column; gap: 10px; ">
 	<div style="margin: 0 auto; display: flex; gap: 10px; ">
 		<button id="zoom-in-button" type="scatter-gather-button"
-			style="display: none; width: 120px; margin: 0 auto; padding: 2px 10px 2px 10px; font-size: 1.2em; border: 0px; border-radius: 5px; background-color: #62b2ff; color:white;">Zoom
+			style="display: none; width: 120px; margin: 0 auto; padding: 2px 10px 2px 10px; font-size: 1.2em; border: 0px; border-radius: 5px; background-color: #4c6d92; color:white;">Zoom
 			In</button>
 		<button id="zoom-out-button" type="scatter-gather-button"
-			style="display: none; width: 120px; margin: 0 auto; padding: 2px 10px 2px 10px; font-size: 1.2em; border: 0px; border-radius: 5px; background-color: #62b2ff; color:white;">Zoom
+			style="display: none; width: 120px; margin: 0 auto; padding: 2px 10px 2px 10px; font-size: 1.2em; border: 0px; border-radius: 5px; background-color: #4c6d92; color:white;">Zoom
 			Out</button>
 	</div>
 	<div id="query-info" style="margin: 0 auto; text-align:center; padding: 10;">
@@ -3373,6 +3347,9 @@ $(document).ready(function() {
 		<div id="math-tex" class="collapsible"
 			style="font-size:75%; margin-top: 0; margin-bottom: 0; color: lightgray; ">
 		</div>
+	</div>
+	<div style="position: absolute; right: 10px; bottom: 10px; color: #4c6d92; font-size: 10px;">
+		&copy; 2024LAIR
 	</div>
 </div>
 

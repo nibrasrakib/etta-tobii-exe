@@ -139,7 +139,7 @@ nav #marker{
 	opacity: 0.7;
 	top: 30%;
 	left: 40%;
-	background-color: dodgerblue;
+	background-color: #4c6d92;
 	color: white;
 	height: 215px;
 	width: 400px;
@@ -417,7 +417,7 @@ nav #marker{
 }
 
 #Explore {
-	background: DodgerBlue;
+	background: #4c6d92;
     color: white;
     opacity: .70;
     text-align: center;
@@ -437,7 +437,7 @@ nav #marker{
 	font-size: 1.2em; 
 	border: 0px; 
 	border-radius: 5px; 
-	background-color: #62b2ff; 
+	background-color: #4c6d92; 
 	color:white;
 }
 
@@ -634,7 +634,7 @@ p.button {
 }
 
 .searchButton {
-	background:DodgerBlue; 
+	background: #4c6d92 ; 
 	color:white; 
 	opacity:.70; 
 	height: 100%; 
@@ -927,7 +927,7 @@ select {
 
 td, th {
 		padding: 1px 4px;
-		border: 1px DodgerBlue solid;
+		border: 1px #4c6d92 solid;
 }
 
 @media only screen and (max-width: 767px) {
