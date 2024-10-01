@@ -3,7 +3,7 @@
 
 <head>
 	<!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-153659007-2"></script>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-153659007-2"></script>
 	<!-- <script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag() {
@@ -21,31 +21,34 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script src="https://kit.fontawesome.com/8da26dfe47.js" crossorigin="anonymous" ></script>
+	<script src="https://kit.fontawesome.com/8da26dfe47.js" crossorigin="anonymous"></script>
 
 	<!--<script src="./layout.js"></script>-->
 
-    <!-- Use TeX to display query path breadcrumb -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
-    <!-- The loading of KaTeX is deferred to speed up page rendering -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
-    <!-- load TeX on complete full page loading -->
-    
+	<!-- Use TeX to display query path breadcrumb -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+		integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+	<!-- The loading of KaTeX is deferred to speed up page rendering -->
+	<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+		integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+		crossorigin="anonymous"></script>
+	<!-- load TeX on complete full page loading -->
+
 	<script>
-	// Fires when the inital HTML document has been completey loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.
-    	document.addEventListener("DOMContentLoaded", function () {
-    		const element = document.getElementById("math-tex");
-    		// use back tick here to allow quotation marks query to not interfere with the syntax
-    		const TeX = `\\text{Current query path: {{query|safe}}}`;
-    		if (element) {
-        		katex.render(TeX, element, {
-            		throwOnError: false,
-        		});
+		// Fires when the inital HTML document has been completey loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.
+		document.addEventListener("DOMContentLoaded", function () {
+			const element = document.getElementById("math-tex");
+			// use back tick here to allow quotation marks query to not interfere with the syntax
+			const TeX = `\\text{Current query path: {{query|safe}}}`;
+			if (element) {
+				katex.render(TeX, element, {
+					throwOnError: false,
+				});
 				// open math tex on start up; see .collapsible behavior 
 				element.style.maxHeight = element.scrollHeight + "px";
-    		}
+			}
 		});
-    </script>
+	</script>
 
 	{% block head %}{% endblock %}
 
@@ -53,7 +56,7 @@
 
 <body>
 	<div class=page>
-		<div id = "login">
+		<div id="login">
 			<ul class="nav justify-content-end">
 				<li class="nav-item">
 				</li>
@@ -64,50 +67,54 @@
 		</div>
 
 
-  
-		<div id ='tutorial'>
+
+		<div id='tutorial'>
 
 		</div>
 		<div id="heading1">
 			<h1 id="main_heading">
-				<a style=font-family:courier;color:#4c6d92;opacity:0.70 id= "pattieword" href=".">ShowMe.news</a>
+				<a style=font-family:courier;color:#4c6d92;opacity:0.70 id="pattieword" href=".">ShowMe.news</a>
 				<img id="pattieLogo" src="static/uoft_logo_v2.png" width="100">
 			</h1>
 
-			
+
 			{% with messages = get_flashed_messages() %}
-				{% if messages %}
-					{% for message in messages %}
-        				<!--<div class=flash>{{ message }}</div> -->
-        				<script>
-            				var message = {{message|tojson}}
-            				alert(message)
-        				</script>
-					{% endfor %}
-				{% endif %}
+			{% if messages %}
+			{% for message in messages %}
+			<!--<div class=flash>{{ message }}</div> -->
+			<script>
+				var message = {{ message| tojson}}
+				alert(message)
+			</script>
+			{% endfor %}
+			{% endif %}
 			{% endwith %}
 		</div>
-		<div style=color:grey; class=menu id="menu">
+		<div style="color:grey;" class=menu id="menu">
 			<div id="sys_description" style="margin-top:20px">
 			</div>
 			<div class="top-container" style="right: 0px; position: fixed;">
-				<a href="https://chipmail.unc.edu/t/pattie-users/" target="_blank" class='text_link' id="community_link" style="display: none;" >Community</a>
+				<a href="https://chipmail.unc.edu/t/pattie-users/" target="_blank" class='text_link' id="community_link"
+					style="display: none;">Community</a>
 				<a href="." id="home_link" class='text_link' style="padding-left:15px; display: none;">Home</a>
-				<a href='{{url_for('static', filename='about.html')}}' class='text_link' style="padding-left:15px;" onclick="return !window.open(this.href, 'tutorial', 'width=1000,height=700')" target="_blank" >About</a>
-				<a href="mailto:msortiz@live.unc.edu" id="contact_us" class='text_link' style="padding-left:15px;" target="_blank">Contact</a>
-                {% if stage == 'alpha' %}
-					<div class="library-dropdown" style="display: none;"> 
-						<a class="text_link"  id="library_link" href=".">Library</a>
-						<ul class="library-menu">
-							<li></li>
-							<li></li>
-							<li></li>
-						</ul>
-					</div>
-                {% endif %}
+				{#<a href='{{url_for(' static', filename='about.html' )}}' class='text_link' style="padding-left:15px;"
+					onclick="return !window.open(this.href, 'tutorial', 'width=1000,height=700')"
+					target="_blank">About</a>#}
+				<a href="mailto:aravind.narayanan@mail.utoronto.ca" id="contact_us" class='text_link'
+					style="padding-left:15px;padding-right:5px;" target="_blank">Contact</a>
+				{% if stage == 'alpha' %}
+				<div class="library-dropdown" style="display: none;">
+					<a class="text_link" id="library_link" href=".">Library</a>
+					<ul class="library-menu">
+						<li></li>
+						<li></li>
+						<li></li>
+					</ul>
+				</div>
+				{% endif %}
 				<!-- <a  href=""  id="signin" class="btn btn-primary" style="background: dodgerblue;opacity: .70; margin-left:15px; margin-right: 5px"><i class="fa fa-sign-in"></i>  Sign in</a> -->
 				<!-- <a  href=""  id="signup" class="btn btn-primary" style="background: dodgerblue;opacity: .70; margin-left:10px; margin-right: 5px"><i class="fa fa-user-plus"></i>  Register</a> -->
-				
+
 				<!-- <a target="_blank" href="{# url_for('home_voice') #}">PATTIE Voice</a> -->
 
 				<!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
@@ -137,7 +144,7 @@
 					</small>
 				</div> -->
 				<!-- Make the copyright as a symbol C@ThisYearLAIR and it should be in the bottom right corner of the page -->
-				<div class="copyright" id="copyright">
+				<div class="copyright" id="copyright" style="opacity: 0;">
 					<small>&copy;
 						<script type="text/javascript">
 							var d = new Date()
@@ -152,16 +159,16 @@
 
 
 		<script>
-			const login = {{login|safe}}
-			const loginType = {{loginType|tojson}}
-			const username = {{username|tojson}}
-			const homeUrl = {{url_for('home')|tojson}}
-			const logoutUrl = {{url_for('logout')|tojson}}
-			const loginHandlerUrl = {{url_for('onyen_login_handler')|tojson}}
-			const stage = {{stage|tojson}}
+			const login = {{ login| safe}}
+			const loginType = {{ loginType| tojson}}
+			const username = {{ username| tojson}}
+			const homeUrl = {{ url_for('home') | tojson}}
+			const logoutUrl = {{ url_for('logout') | tojson}}
+			const loginHandlerUrl = {{ url_for('onyen_login_handler') | tojson}}
+			const stage = {{ stage| tojson}}
 		</script>
 
-    	<!--<scriptssssss type=text/javascript>
+		<!--<scriptssssss type=text/javascript>
     
     
         	const login = {{login|safe}}
@@ -228,4 +235,5 @@
 	</div>
 	<script src="{{url_for('static', filename='layout.js')}}"></script>
 </body>
+
 </html>

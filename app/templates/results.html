@@ -20,10 +20,10 @@
 	document.getElementById("main_heading").style="magin:10px; text-align:left; ";
 	// document.getElementById("pattieword").style.paddingLeft = "3vw";
 	// Make the pattiword in the top center fixed position
-	document.getElementById("pattieword").style="position: fixed; top: 0px; left: 50%; transform: translate(-50%, 0%); color: #62b2ff";
+	document.getElementById("pattieword").style="position: fixed; top: 0px; left: 50%; transform: translate(-50%, 0%); color: #4c6d92";
 	// document.getElementById("copyright").style= "position: fixed; top:12%; left: 16%; width: 10vw";
 	// Make the copyright in the bottom right with symbol even if it overlaps
-	document.getElementById("copyright").style= "position: fixed; bottom: 0px; right: 0px; width: 10vw";
+	document.getElementById("copyright").style= "position: fixed; bottom: 0px; right: 0px; width: 10vw;opacity:0;";
 	document.getElementsByClassName("page")[0].style="height:90%";
 	//console.log(document.getElementsByClassName("page")[0].style);
 	document.getElementById("home_link").style.display="inline-block";
@@ -1177,7 +1177,7 @@ function citationGenerator(id){
 					}
 					var btn = document.createElement("button");
 					btn.setAttribute("title", "copy citation to clipboard");
-					btn.innerHTML = '<i class="far fa-copy"></i>';
+					// btn.innerHTML = '<i class="far fa-copy"></i>';
 					btn.style.backgroundColor = "#4c6d92";
 					btn.style.color = "white";
 					btn.style.opacity = 0.7;
@@ -1258,7 +1258,7 @@ function citationGenerator(id){
 					}
 					var btn = document.createElement("button");
 					btn.setAttribute("title", "copy citation to clipboard");
-					btn.innerHTML = '<i class="far fa-copy"></i>';
+					// btn.innerHTML = '<i class="far fa-copy"></i>';
 					btn.style.backgroundColor = "#4c6d92";
 					btn.style.color = "white";
 					btn.style.opacity = 0.7;
@@ -1324,20 +1324,25 @@ function citationGenerator(id){
 
 					// Create the title as a clickable link
 					var link = document.createElement("a");
-					link.setAttribute("href", html_link); // Set the href to the HTML link
-					link.setAttribute("target", "_blank"); // Open link in a new tab
+					// link.setAttribute("href", html_link); // Set the href to the HTML link
+					// link.setAttribute("target", "_blank"); // Open link in a new tab
 					link.innerHTML = title; // Set the title as the link text
-
+					link.style.padding = "5px";
+					link.style.color = "#4c6d92";
+					link.style.cursor = "pointer";
 					// Append the link to the div
 					div.appendChild(link);
-
+					link.addEventListener('click',function(){
+						window.open(html_link, 'newwindow', 'width=500,height=450')
+						return false;
+					})
 					// Add the "Copy Citations" button
 					var btn = document.createElement("button");
 					btn.setAttribute("title", "Copy citation to clipboard");
-					btn.innerHTML = '<i class="far fa-copy"></i>'; // Copy icon
+					// btn.innerHTML = '<i class="far fa-copy"></i>'; // Copy icon
 					btn.style.backgroundColor = "#4c6d92";
 					btn.style.color = "white";
-					btn.style.opacity = 0.7;
+					btn.style.opacity = 0;
 					btn.style.border = "none";
 					btn.style.borderRadius = "4px";
 					btn.style.display = "inline";
@@ -1345,6 +1350,7 @@ function citationGenerator(id){
 					btn.style.marginTop = "-12px";
 					btn.style.marginBottom = "12px";
 					btn.style.height = "15px";
+					btn.style.padding = "5px";
 
 					// Create the citation text
 					var citation = `@article{${title.split(" ")[0].toLowerCase()},\n  title={${title}},\n  link={${html_link}}}`;
@@ -1386,7 +1392,7 @@ function citationGenerator(id){
 		if (dataset_opt !== "PubMedAPI" && dataset_opt !== "NewsAPI" && dataset_opt !== "PostgreSQL") {
 			// console.log("Not PubMedAPI or NewsAPI or PostgresSQL");
 			container.innerHTML =
-				'<h3 style="color:#4c6d92;opacity:0.75">Clustered Publications</h3>' +
+				'<h3 style="color:#4c6d92;opacity:0.75; padding:5px;">Clustered Publications</h3>' +
 				"\n<p>" +
 				bibs_list +
 				"</p>";
@@ -1399,14 +1405,14 @@ function citationGenerator(id){
 			// console.log(document_array);
 			var btn = document.createElement("button");
 			btn.setAttribute("id", "citationButton");
-			btn.innerHTML = '<i class="far fa-copy"></i> Copy Citations';
+			// btn.innerHTML = '<i class="far fa-copy"></i> Copy';
 			btn.style.backgroundColor = "#4c6d92";
-			btn.style.opacity = 0.7;
+			btn.style.opacity = 0;
 			btn.style.color = "white";
 			btn.style.border = "none";
 			btn.style.borderRadius = "4px";
 			btn.style.marginBottom = "25px";
-			btn.setAttribute("title", "copy all citations to clipboard");
+			btn.setAttribute("title", "copy all to clipboard");
 
 
 			document.getElementById("documentContainer").innerHTML +=
@@ -1466,7 +1472,7 @@ function citationGenerator(id){
 			// console.log("Not PubMedAPI or NewsAPI or PostgresSQL");
 			var btn = document.createElement("button");
 			btn.setAttribute("id", "citationButton");
-			btn.innerHTML = '<i class="far fa-copy"></i> Copy Citations';
+			btn.innerHTML = '<i class="far fa-copy"></i> Copy ';
 			btn.style.backgroundColor = "#4c6d92";
 			btn.style.opacity = 0.7;
 			btn.style.color = "white";
@@ -2125,7 +2131,7 @@ function citationGenerator(id){
 									 }else if(menu_text == "Zoom out"){
 										 document.getElementById('back').click();
 									 }
-									 else if(menu_text == "Copy Citations"){
+									 else if(menu_text == "Copy"){
 										d3.selectAll('circle').each(function(d){
 												if (d.id == circleId){
 													copyCitations(d);
@@ -2138,7 +2144,7 @@ function citationGenerator(id){
 								 }else if (i == 6){
 									var text_id = "menu-text" + i.toString();
 									var menu_text = document.getElementById(text_id).textContent;
-									 if (menu_text == "Copy Citations"){
+									 if (menu_text == "Copy"){
 										d3.selectAll('circle').each(function(d){
 												if (d.id == circleId){
 													copyCitations(d);
@@ -3272,13 +3278,14 @@ $(document).ready(function() {
 	<!-- <nav id="entities_menu" style="background-color: dodgerblue; opacity: 0.7; margin-left: 8px; padding: 10px; border-radius: 5px; position: fixed; z-index: 1;"> -->
 	<!-- Make the entities_menu invisible -->
 	{% if dataset != 'PubMedAPI' %}
-	 <style>
+	<style>
 		#entities_menu {
 			opacity: 0 !important;
 		}
-	 </style>
+	</style>
 	{% endif %}
-	<nav id="entities_menu" style="background-color: #4c6d92; opacity: 0.7; margin-left: 8px; padding: 10px; border-radius: 5px; position: fixed; z-index: 1;">
+	<nav id="entities_menu"
+		style="background-color: #4c6d92; opacity: 0.7; margin-left: 8px; padding: 10px; border-radius: 5px; position: fixed; z-index: 1;">
 		<!-- <div id="marker" style="width:47px"></div> -->
 		{% if dataset == 'PubMedAPI' %}
 		<a href="#" id='keywords' onClick="refreshEntity('keywords')">Keywords</a>
@@ -3349,7 +3356,7 @@ $(document).ready(function() {
 		</div>
 	</div>
 	<div style="position: absolute; right: 10px; bottom: 10px; color: #4c6d92; font-size: 10px;">
-		&copy; 2024LAIR
+		&copy; 2024 LAIR
 	</div>
 </div>
 

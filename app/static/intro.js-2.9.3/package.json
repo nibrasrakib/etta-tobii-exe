@@ -35,5 +35,8 @@
     "output": [
       "introjs.css"
     ]
+  },
+  "dependencies": {
+    "intro.js": "file:"
   }
 }
