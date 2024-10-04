@@ -15,10 +15,11 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<title>PATTIE - Publication Through Tiered Interaction & Exploration</title>
+	<title>SHOWME.NEWS</title>
 	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.min.css') }}">
 	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="icon" href="{{url_for('static', filename='world-news.png')}}" type="image/x-icon">
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script src="https://kit.fontawesome.com/8da26dfe47.js" crossorigin="anonymous"></script>
@@ -97,9 +98,13 @@
 				<a href="https://chipmail.unc.edu/t/pattie-users/" target="_blank" class='text_link' id="community_link"
 					style="display: none;">Community</a>
 				<a href="." id="home_link" class='text_link' style="padding-left:15px; display: none;">Home</a>
-				{#<a href='{{url_for(' static', filename='about.html' )}}' class='text_link' style="padding-left:15px;"
+				<!-- {#<a href='{{url_for(' static', filename='about.html' )}}' class='text_link' style="padding-left:15px;"
 					onclick="return !window.open(this.href, 'tutorial', 'width=1000,height=700')"
-					target="_blank">About</a>#}
+					target="_blank">About</a>#} -->
+				<a href='{{url_for('static', filename='help.html')}}' class='text_link' style="padding-left:15px;" 
+					onclick="return !window.open(this.href, 'tutorial', 'width=1000,height=700')" target="_blank" >Help</a>
+				<a href='{{url_for('static', filename='about.html')}}' class='text_link' style="padding-left:15px;" 
+					onclick="return !window.open(this.href, 'tutorial', 'width=1000,height=700')" target="_blank" >About</a>
 				<a href="mailto:aravind.narayanan@mail.utoronto.ca" id="contact_us" class='text_link'
 					style="padding-left:15px;padding-right:5px;" target="_blank">Contact</a>
 				{% if stage == 'alpha' %}

@@ -56,6 +56,8 @@ def execute_query(query, hostname, port, database, username, password):
         return [], error
 
 
+
+
 def retrieve_from_postgresql(author_name):
     hostname = '34.133.177.246'
     port = 5432
@@ -180,3 +182,46 @@ def optimal_number_of_clusters(data, max_clusters=10):
     best_k = np.argmax(silhouette_scores) + 2  # because we started with k=2
 
     return best_k
+
+
+
+def get_date_summary(hostname = '34.133.177.246',
+                    port = 5432,
+                    database = 'rss_feed',
+                    username = 'aravind',
+                    password = 'C&99Fk6xHxypA2R$C4XQ'):
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(
+            host=hostname,
+            port=port,
+            database=database,
+            user=username,
+            password=password
+        )
+        
+        # Create a cursor
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Get the date summary
+        cur.execute("SELECT * FROM date_summary")
+        result = cur.fetchone()
+        
+        # Convert the result to a DataFrame
+        result_df = pd.DataFrame([result])
+        # Should have columns: id, earliest_date, latest_date, last_updated
+        # Get the date strings in a readable format (YYYY-MM-DD) for earliest_date and latest_date, and last_updated
+        result_df['earliest_date'] = result_df['earliest_date'].dt.strftime('%Y-%B-%d')
+        result_df['latest_date'] = result_df['latest_date'].dt.strftime('%Y-%B-%d')
+        result_df['last_updated'] = result_df['last_updated'].dt.strftime('%Y-%B-%d %H:%M:%S')
+        
+        return result_df['earliest_date'][0], result_df['latest_date'][0], result_df['last_updated'][0]
+    
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        
+    finally:
+        # Close the cursor and connection
+        cur.close()
+        conn.close()

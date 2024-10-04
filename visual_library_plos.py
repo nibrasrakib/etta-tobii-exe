@@ -716,7 +716,7 @@ def kmeans(doc_term_mat, keywords, org_ids, n_components, k, n_desc=5):
 
     tsne = MyTSNE(n_components=2,
                   perplexity=perplexity,
-                  max_iter=5000, random_state=123)
+                  n_iter=5000, random_state=123)
     cluster_centers = tsne.fit_transform(
         km.cluster_centers_[populated_ids])  # only calculate tsne for the populated_ids
 

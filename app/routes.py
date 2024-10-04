@@ -51,6 +51,7 @@ import pysolr
 from elasticsearch import Elasticsearch
 from openai import OpenAI
 from generate_summary import generate_summary
+from cluster_postgreSQL import get_date_summary
 
 import logging
 # Set logging level to suppress debug/info logs
@@ -612,6 +613,7 @@ def re_cluster():
     # Store session data
     def unpack_list(lst):
         return [item for sublist in lst for item in sublist]
+    
     print("recustering ----> updated state to store session data: ", state+1)
     sessionData["id2members_" + str(state + 1)] = id2members
     sessionData["cluster_desc_" + str(state + 1)] = unpack_list(convert_ndarray_to_list(cluster_title_list))
@@ -645,6 +647,9 @@ def re_cluster():
         "id2members": id2members,
         "sources": sources,
         "response_time": response_time,
+        "ear_date": sessionData["ear_date"],
+        "lat_date": sessionData["lat_date"],
+        "last_up": sessionData["last_up"],
     }
     print("cluster_centers: ", cluster_centers)
     print("state in re_cluster finally", state+1) 
@@ -1387,7 +1392,10 @@ def cluster():
     if len(org_ids) > 150:
         bibs = []
     """
-
+    import datetime
+    import cluster_postgreSQL
+    from cluster_postgreSQL import get_date_summary
+    ear_date, lat_date, last_up = get_date_summary()
     # session['doc_term_mat'] = doc_term_mat  # term-doc matrix
     session["docs_org"] = orig_doc_term_mat  # doc-term raw freq matrix
     session["df_org"] = orig_df
@@ -1404,6 +1412,9 @@ def cluster():
     session["edges_0"] = edges
     session["sources"] = sources
     session["id2meshTerms"] = id2meshTerms
+    session["ear_date"] = ear_date
+    session["lat_date"] = lat_date
+    session["last_up"] = last_up
 
     session["entity"] = entity
     if entity == "authors":
@@ -1482,7 +1493,10 @@ def cluster():
         "org_ids_0": convert_ndarray_to_list(org_ids),
         "dataset": dataset,
         "edges_0": convert_ndarray_to_list(edges),
-        "sources": convert_ndarray_to_list(sources)
+        "sources": convert_ndarray_to_list(sources),
+        "ear_date": ear_date,
+        "lat_date": lat_date,
+        "last_up": last_up
     }
 
     # session['df'] = df_new
@@ -1539,6 +1553,9 @@ def cluster():
         response_time=response_time,
         path=path,
         num_cls=num_cls,
+        ear_date=ear_date,
+        lat_date=lat_date,
+        last_up=last_up,
     )
     
     

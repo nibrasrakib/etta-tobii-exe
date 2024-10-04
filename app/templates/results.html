@@ -6,6 +6,38 @@
 <!-- responsive web design tag to adjust for all devices -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+<!-- Add browser tab icon named world-news_2.png -->
+<!-- <link rel="icon" href="{{url_for('static', filename='world-news_2.png')}}" type="image/x-icon"> -->
+
+
+<!-- Display the Earliest and Latest Dates -->
+<div class="date-info">
+    <p>News coverage:<br> <strong>{{sessionData.ear_date}}</strong> 
+    to <strong>{{sessionData.lat_date}}</strong>.</p>
+</div>
+
+<style>
+    .date-info {
+        position: fixed;
+        bottom: 50px; /* Adjust as needed */
+        left: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 0.7em;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        text-align: left; /* Align text to the right */
+    }
+
+    .date-info p {
+        margin: 0;
+    }
+</style>
+
+<!-- Debugging Output -->
+<!-- <p><strong>Earliest Date:</strong> {{ sessionData.ear_date }} | <strong>Latest Date:</strong> {{ sessionData.lat_date }}</p> -->
+
 
 <style>
 	.hide {
@@ -32,8 +64,7 @@
 //changing the heading for each page
 document.getElementById("heading1").style= "position:fixed; top:-1%; left:0%";
 //console.log('{{dataset}}');
-//document.getElementById("tutorial").innerHTML= "<a href='{{url_for('static', filename='about.html')}}' class='text_link' onclick=\"return !window.open(this.href, 'tutorial', 'width=800,height=600')\" target=\"_blank\" style='text-align:left; margin-left:-1175px'>About</a>\
-	//                                              <dt><a href=# class='text_link' style='text-align:left; margin-left:-1070px' onclick='tutorial()'>A Step-by-Step Intro </a>";
+// document.getElementById("tutorial").innerHTML= "<a href='{{url_for('static', filename='about.html')}}' class='text_link' onclick=\"return !window.open(this.href, 'tutorial', 'width=800,height=600')\" target=\"_blank\" style='text-align:left; margin-left:-1175px'>About</a>";
 
 const pattie_blue = '#62b2ff'
 const color_code_table = {
@@ -2750,16 +2781,16 @@ $(function() {
 			 
 			//  console.log("newSessionData.state: " + newSessionData.state);
 			// display id2members for each state it is of the form id2members_0, id2members_1, id2members_2, etc till the last state
-			for (var i = 0; i <= newSessionData.state; i++) {	
-				// console.log("newSessionData.id2members_" + i + ": " + newSessionData["id2members_" + i]);	
-				// console.log("newSessionData.cluster_desc_" + i + ": " + newSessionData["cluster_desc_" + i]);
-				// console.log("newSessionData.cluster_summary_" + i + ": " + newSessionData["cluster_summary_" + i]);
-				// console.log("newSessionData.xy_" + i + ": " + newSessionData["xy_" + i]);
-				// console.log("newSessionData.hue_" + i + ": " + newSessionData["hue_" + i]);
-				// console.log("newSessionData.satr_" + i + ": " + newSessionData["satr_" + i]);
-				// console.log("newSessionData.edges_" + i + ": " + newSessionData["edges_" + i]);
+			// for (var i = 0; i <= newSessionData.state; i++) {	
+			// 	// console.log("newSessionData.id2members_" + i + ": " + newSessionData["id2members_" + i]);	
+			// 	// console.log("newSessionData.cluster_desc_" + i + ": " + newSessionData["cluster_desc_" + i]);
+			// 	// console.log("newSessionData.cluster_summary_" + i + ": " + newSessionData["cluster_summary_" + i]);
+			// 	// console.log("newSessionData.xy_" + i + ": " + newSessionData["xy_" + i]);
+			// 	// console.log("newSessionData.hue_" + i + ": " + newSessionData["hue_" + i]);
+			// 	// console.log("newSessionData.satr_" + i + ": " + newSessionData["satr_" + i]);
+			// 	// console.log("newSessionData.edges_" + i + ": " + newSessionData["edges_" + i]);
 				
-			}	
+			// }	
 			 /* update session storage with updated data */
 			 sessionStorage.setItem('sessionData', JSON.stringify(newSessionData));
 			 //formatting the new data
@@ -2781,9 +2812,6 @@ $(function() {
 
 	}
 
-	// "desc":[[["Trump's","Election","Focus"]],[["Trump's","Legal","Battles"]],[["Debate","Highlights"]],[["Trump","Assassination","Attempts"]],[["Trump's","False","Claims"]],[["Trump","vs.","Endorsements"]],[["Trump","Rally","Security","Concerns"]],[["Trump","vs.","Harris","Debate"]],[["RFK","Jr.","Endorses","Trump"]],[["Late","Night","News"]]],"summary":[["Trump, Vance, and election concerns."],["Various legal issues involving Trump."],["Trump-Harris debate key takeaways and moments."],["Attempted attacks on Trump prompt Secret Service scrutiny."],["News about Trump's misleading statements and their repercussions."],["Political endorsements and controversies among Trump, RFK Jr., and Taylor Swift."],["Various news on Secret Service failures and rally incidents."],["Coverage on election debate dynamics."],["Robert F. Kennedy Jr. suspends campaign to endorse Trump."],["Late night shows' takes on debates, Trump, Musk, and Biden."]],
-
-	// "desc":{"0":["Trump","Legal","Battles"],"1":["RFK","Jr","vs.","Trump","in","North","Carolina"],"2":["RFK","Jr","Endorses","Trump"],"3":["Political","Maneuverings"],"4":["Trump's","Election","Prospects"],"5":["Kamala","Harris","Campaign","Focus"],"6":["US","Election","Updates"],"7":["Republican","Strategies","on","Women","Voters"],"8":["Election","Contingency","Planning"],"9":["Trump's","Expensive","Tax","Cuts"]},
 
 	function generateNewData(data) {
 	 	var new_data = [] ;
