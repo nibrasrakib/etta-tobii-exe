@@ -276,6 +276,7 @@ function modify_data (data, width, height, resize_factor) {
 		var num_short_item = short_keywords.length;
 		const cluster_radius = data[i].actual_radius * resize_factor;
 		const font_scale = compute_font_scale(cluster_radius, short_keywords.map(k => k.term));
+		console.log('font scale is ' + font_scale);
 
 		for (var j = 0; j < num_short_item; j++) {
 			temp_item = {} ;
@@ -311,6 +312,39 @@ function compute_font_scale(cluster_radius, keywords) {
     const font_scale = cluster_radius / diagonal_length; // Adjusting the scaling factor for better fit
     return font_scale;
 }
+
+// function compute_font_scale(cluster_radius, keywords) {
+//     const longest_term = [...keywords].sort((a, b) => b.length - a.length)[0];
+//     const max_characters = longest_term.length;
+//     const number_of_lines = keywords.length;
+
+//     // Padding for text inside the bubble (slightly smaller to give more room for font fitting)
+//     const padding = 0.7;  // Using 70% of the radius for text (30% is padding)
+//     const available_radius = cluster_radius * padding;
+
+//     // Estimate height-based constraints (important for multi-line text)
+//     const line_height = 1.3;  // Reduced line height for tighter fit
+//     const total_text_height = number_of_lines * line_height;
+
+//     // Width constraint: Fit the longest word within the available space
+//     const width_based_font_size = available_radius / (max_characters * 0.5);  // Adjust width scaling to better fit long words
+
+//     // Height constraint: Fit the total height of text within the bubble
+//     const height_based_font_size = available_radius / total_text_height;
+
+//     // Choose the smallest font size to ensure text fits both width and height constraints
+//     const final_font_scale = Math.min(width_based_font_size, height_based_font_size);
+
+//     // Apply maximum and minimum font size limits
+//     const max_font_size = 14;  // Capping at 14px to avoid overflow
+//     const min_font_size = 9;   // Ensure text is legible even in small bubbles
+
+//     return Math.max(Math.min(final_font_scale, max_font_size), min_font_size);
+// }
+
+
+
+
 
 //  initialize timestamps for click data
 var dateTime = new Date();
@@ -2034,6 +2068,7 @@ function citationGenerator(id){
  		d3.select('.context-menu').remove();
  		d3.select('foreignObject').remove();
 	}
+
 	function contextMenu() {
 			 var height = 22,
 					 width = 110,
