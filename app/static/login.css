@@ -51,7 +51,7 @@ body {
   border-radius: 5px;
   height: 30px;
 }
-.menu {
+/* .menu {
   margin: 0;
   width: 98%;
   top: 100%;
@@ -63,7 +63,7 @@ body {
   color: grey;
   background: rgba(235, 235, 235, 0);
   z-index: 1;
-}
+} */
 
 .menu a:link,
 .menu a:visited {
@@ -76,11 +76,22 @@ body {
 #menu {
   top: 0px;
   text-align: right;
-  margin-top: 6px;
+  /* margin-top: 6px; */
 }
 .text_link {
   color: grey;
 }
 a:hover {
   text-decoration: none;
+}
+
+input[type="text"]::-webkit-search-decoration,
+input[type="text"]::-webkit-search-cancel-button,
+input[type="text"]::-webkit-search-results-button,
+input[type="text"]::-webkit-search-results-decoration,
+input[type="email"]::-webkit-search-decoration,
+input[type="email"]::-webkit-search-cancel-button,
+input[type="email"]::-webkit-search-results-button,
+input[type="email"]::-webkit-search-results-decoration {
+    display: none;
 }

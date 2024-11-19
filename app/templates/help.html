@@ -1,0 +1,118 @@
+{% extends 'header.html' %}
+{% block head %}
+<style>
+    body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #fff; /* Keep the background white */
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    h1 {
+        color: dodgerblue;
+        opacity: 0.85;
+        font-size: 2em;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    p {
+        color: #555;
+        font-size: 1.1em;
+        margin-bottom: 20px;
+        text-align: justify;
+    }
+
+    a {
+        color: dodgerblue;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .contact-info {
+        margin-top: 40px;
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .contact-info p {
+        margin-bottom: 10px;
+    }
+
+    .logo {
+        margin: 20px; /* Add margin to give space around the logo */
+        width: 100px; /* Set logo width */
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        h1 {
+            font-size: 1.8em;
+        }
+
+        p {
+            font-size: 1em;
+        }
+
+        .logo {
+            width: 80px; /* Adjust logo size for mobile */
+            margin: 15px; /* Adjust margin for mobile */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <!-- Logo at the top-left corner -->
+    <img src="{{ url_for('static', filename='uoft_logo_v2.png') }}" alt="University of Toronto Logo" class="logo">
+
+    <h1>How to navigate through ShowMe.news</h1>
+    <p>
+        ShowMe.news is a dynamic news clustering system that allows users to explore news articles based on their
+        interests. By entering specific keywords, users can quickly retrieve relevant news articles, group them into
+        meaningful clusters, and explore related topics in an organized manner. This approach provides a powerful tool
+        for organizing and analyzing large amounts of news data in real time, enabling users to identify trends, explore
+        topics of interest, and gain a better understanding of complex news stories and their relationships.
+        ShowMe.news enhances the user experience by providing a visual and interactive way to explore news content,
+        making it easier to discover and engage with relevant information. Whether you are looking for the latest news
+        on a specific topic or want to explore trending stories, ShowMe.news offers a dynamic and user-friendly platform
+        for exploring news articles based on your interests.
+    </p>
+
+    <h1>How to use ShowMe.news?</h1>
+    <p>
+        To use ShowMe.news, simply enter one or more keywords in the search bar and click "Search". The system will
+        retrieve relevant news articles based on your keywords and display them in an organized manner. You can explore
+        the news clusters by clicking on the nodes in the visualization, which represent different topics or themes. By
+        interacting with the visualization, you can navigate through the news clusters, view related articles, and gain
+        insights into the news content. You can zoom in or zoom out of the visualization to explore the news clusters in
+        more detail. ShowMe.news provides a user-friendly interface that allows you to explore news articles in a
+        dynamic and interactive way, making it easy to discover and engage with relevant information.
+    </p>
+
+    <h1>Questions?</h1>
+    <div class="contact-info">
+        <p>Contact: <a href="mailto:aravind.narayanan@mail.utoronto.ca">Aravind Narayanan</a></p>
+        <p>Laboratory of Applied Informatics Research</p>
+        <p>Faculty of Information</p>
+        <p>University of Toronto, ON, Canada</p>
+    </div>
+</div>
+{% endblock %}

@@ -52,6 +52,8 @@ from elasticsearch import Elasticsearch
 from openai import OpenAI
 from generate_summary import generate_summary
 from cluster_postgreSQL import get_date_summary
+from app.models import WebGazeData
+from app import app, db
 
 import logging
 # Set logging level to suppress debug/info logs
@@ -164,6 +166,11 @@ def home():
     field = "All fields"
     today = datetime.today().strftime("%Y-%m-%d")
     yesterday = (datetime.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+    # Print all arguments being passed to the home page 
+    print("Arguments passed to home page: ")
+    print("login: ", login, "loginType: ", loginType, "username: ", username, "field: ", field, "uploaded_files: ", uploaded_files, "start_date: ", yesterday, "end_date: ", today)
+    # Print is_authenicated
+    print("is_authenticated: ", current_user.is_authenticated)
     return render_template(
         "index.html",
         login=login,
@@ -173,8 +180,57 @@ def home():
         uploaded_files=uploaded_files,
         start_date=yesterday,
         end_date=today,
+        is_authenticated=current_user.is_authenticated,
+    )
+    
+@app.route('/calibration')
+def calibration():
+    return render_template('calibration.html')
+
+@app.route('/save_gaze_data', methods=['POST'])
+def save_gaze_data():
+    if not current_user.is_authenticated:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    data = request.json
+    gaze_data = data.get('gaze_data')
+    timestamp = datetime.now()
+
+    if not gaze_data:
+        return jsonify({"error": "No gaze data provided"}), 400
+
+    # Create a new WebGazeData entry and save it to the database
+    new_entry = WebGazeData(
+        username=current_user.username,
+        timestamp=timestamp,
+        gaze_data=gaze_data
+    )
+    db.session.add(new_entry)
+    db.session.commit()
+
+    return jsonify({"status": "success", 
+                    "message": "Gaze data saved successfully."})
+
+@app.route('/get_latest_gaze_data', methods=['GET'])
+def get_latest_gaze_data():
+    if not current_user.is_authenticated:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    # Query the latest gaze data for the current user
+    latest_data = (
+        WebGazeData.query
+        .filter_by(username=current_user.username)
+        .order_by(WebGazeData.timestamp.desc())
+        .first()
     )
 
+    if latest_data:
+        return jsonify({
+            "status": "success",
+            "gaze_data": latest_data.gaze_data  # Assuming `gaze_data` is a JSON field
+        })
+    else:
+        return jsonify({"status": "success", "gaze_data": None})  # No previous data found
 
 @app.route("/_back", methods=["POST", "GET"])
 def back():

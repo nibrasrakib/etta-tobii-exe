@@ -288,7 +288,7 @@ function changeField (value) {
 		document.getElementById("field").innerHTML = "";
 		createOption_field("All fields");
 		// user has selected an uploaded file, reveal the delete button and enable delete file function
-		document.getElementById("delete").style.visibility = "visible";
+		document.getElementById("delete").style.visibility = "hidden";
 	}
 }
 

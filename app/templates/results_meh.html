@@ -49,8 +49,6 @@
 <script src="{{ url_for('static', filename='webgazer.js') }}" type="text/javascript"></script>
 <!-- Setup the webgazer cursor setGazeListener and begin calibration -->
 <script>
-	// // Ensure that WebGazer is available
-
 	// Function to load the latest gaze data from the backend and set it in localforage
 	async function loadLatestGazeData() {
 		try {
@@ -62,7 +60,7 @@
 
 				if (gazeData) {
 					// Set localforage with the retrieved data if it exists
-					localforage.setItem('webgazerGlobalData', gazeData);
+					await localforage.setItem('webgazerGlobalData', gazeData);
 					console.log("Loaded latest gaze data into localforage:", gazeData);
 				} else {
 					// No previous data, so localforage will be empty
@@ -71,56 +69,157 @@
 			} else {
 				console.error("Error retrieving gaze data:", data.error);
 			}
-			return data;
 		} catch (error) {
 			console.error("Error fetching latest gaze data:", error);
 		}
 	}
-	// Function to initialize WebGazer
+	// // Function to initialize WebGazer
+	// async function startWebGazer() {
+	// 	// Ensure localforage is populated with gaze data before WebGazer starts
+	// 	await loadLatestGazeData();
+
+	// 	// Check if WebGazer is available and initialize it
+	// 	if (webgazer) {
+	// 		console.log("WebGazer.js loaded successfully.");
+
+	// 		webgazer.setGazeListener(function (data, elapsedTime) {
+	// 			if (data == null) {
+	// 				return;
+	// 			}
+	// 			var xprediction = data.x; // X coordinate of gaze
+	// 			var yprediction = data.y; // Y coordinate of gaze
+	// 			//   console.log("Gaze prediction:", xprediction, yprediction);
+	// 		}).begin();  // Start WebGazer
+
+	// 		webgazer.addTracker('clmtrackr');
+	// 		webgazer.setTracker('clmtrackr');
+	// 		webgazer.params.showFaceFeedbackBox = true;
+	// 		webgazer.params.showFaceOverlay = true;
+	// 		webgazer.params.faceMode = 'single';
+	// 		webgazer.setRegression("threadedRidge");
+
+	// 		// Enable kalman filter for better eye tracking
+	// 		webgazer.applyKalmanFilter(true);  // Enable by default
+	// 		// Set window.saveDataAcrossSessions to false
+	// 		window.saveDataAcrossSessions = false;
+
+	// 		// Log kalman filter status
+	// 		if (webgazer.params.kalmanFilter) {
+	// 			console.log("Kalman filter is enabled");
+	// 		}
+	// 		console.log("WebGazer initialized and tracking started.");
+	// 	} else {
+	// 		console.error("Failed to load WebGazer.js.");
+	// 	}
+	// }
+
+	let lastCheckedLength = 0; // Tracks the last known length of gaze data
+	let sessionKey = `webgazerSession_${Date.now()}`; // Unique session key for each user session
+
+	// Check for new data points and log them
+	async function checkNewGazeData() {
+		try {
+			const gazeData = await localforage.getItem('webgazerGlobalData');
+			if (gazeData && Array.isArray(gazeData)) {
+				// Log only new data points
+				if (gazeData.length > lastCheckedLength) {
+					for (let i = lastCheckedLength; i < gazeData.length; i++) {
+						console.log("New Gaze Data Point:", gazeData[i]);
+					}
+					lastCheckedLength = gazeData.length;
+				}
+			}
+		} catch (error) {
+			console.error("Error retrieving data from localForage:", error);
+		}
+	}
+
+	// Save the current gaze data to the database
+	async function saveGazeDataToDB() {
+		try {
+			const gazeData = await localforage.getItem('webgazerGlobalData');
+			if (gazeData && gazeData.length > 0) {
+				const response = await fetch('/save_gaze_data', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ gaze_data: gazeData })
+				});
+				const result = await response.json();
+				console.log("Gaze data saved to DB:", result);
+
+				// Clear data after saving to avoid duplicate storage
+				await clearGazeData();
+			} else {
+				console.log("No gaze data to save.");
+			}
+		} catch (error) {
+			console.error("Error saving gaze data to DB:", error);
+		}
+	}
+
+	// Save individual gaze data points under a unique session key
+	async function saveGazeData(data) {
+		const existingData = await localforage.getItem(sessionKey) || [];
+		existingData.push(data);
+		await localforage.setItem(sessionKey, existingData);
+		console.log("Saved data to session key:", sessionKey);
+	}
+
+	// Clear gaze data in localForage
+	async function clearGazeData() {
+		await localforage.setItem('webgazerGlobalData', []);
+		lastCheckedLength = 0; // Reset last checked length
+		console.log("webgazerGlobalData cleared.");
+	}
+
+	// Initialize WebGazer with periodic data saving
 	async function startWebGazer() {
-		// Ensure localforage is populated with gaze data before WebGazer starts
-		const latest_data = await loadLatestGazeData();
-		
-		console.log("latest_datalatest_datalatest_datalatest_datalatest_data",latest_data)
-		// Check if WebGazer is available and initialize it
+		await loadLatestGazeData(); // Load existing gaze data on start
+
 		if (webgazer) {
 			console.log("WebGazer.js loaded successfully.");
 
-			webgazer.setGazeListener(function (latest_data, elapsedTime) {
-				if (latest_data == null) {
-					return;
-				}
-				var xprediction = latest_data.x; // X coordinate of gaze
-				var yprediction = latest_data.y; // Y coordinate of gaze
-				//   console.log("Gaze prediction:", xprediction, yprediction);
-			}).begin();  // Start WebGazer
+			// WebGazer listener for gaze data
+			webgazer.setGazeListener(async function (data, elapsedTime) {
+				if (data == null) return;
 
-			
-			webgazer.setTracker('clmtrackr');
+				const gazePoint = { x: data.x, y: data.y, elapsedTime: elapsedTime };
+
+				// Save gaze point to localForage and session key
+				let existingData = await localforage.getItem('webgazerGlobalData') || [];
+				existingData.push(gazePoint);
+				await localforage.setItem('webgazerGlobalData', existingData);
+				await saveGazeData(gazePoint); // Save to session-based key if needed
+
+				// Log the new gaze data point
+				console.log("Updated gaze data:", existingData);
+			}).begin();
+
+			// WebGazer configurations
 			webgazer.addTracker('clmtrackr');
+			webgazer.setTracker('clmtrackr');
 			webgazer.params.showFaceFeedbackBox = true;
 			webgazer.params.showFaceOverlay = true;
 			webgazer.params.faceMode = 'single';
 			webgazer.setRegression("threadedRidge");
-
-			// Enable kalman filter for better eye tracking
-			webgazer.applyKalmanFilter(true);  // Enable by default
-			// Set window.saveDataAcrossSessions to false
-			window.saveDataAcrossSessions = true;
-
-			// Log kalman filter status
-			if (webgazer.params.kalmanFilter) {
-				console.log("Kalman filter is enabled");
-			}
+			webgazer.applyKalmanFilter(true);
+			window.saveDataAcrossSessions = false;
+			
 			console.log("WebGazer initialized and tracking started.");
 		} else {
 			console.error("Failed to load WebGazer.js.");
 		}
 	}
 
+	// Run the checkNewGazeData function every 2 seconds
+	setInterval(checkNewGazeData, 2000);
+
+	// Save gaze data to the database every 20 seconds
+	setInterval(saveGazeDataToDB, 20000);
+
+
 	// Call startWebGazer on page load or after the user logs in
 	document.addEventListener("DOMContentLoaded", startWebGazer);
-	
 </script>
 
 
@@ -946,6 +1045,101 @@ function VoiceEdges(cluster) {
 
 	}
 
+	// function mouseover(d, min_resize_factor){
+
+	// 	const hoverDelay = 5000; // 5 seconds
+	// 	let hoverTimer;
+
+	// 	// Select the bubble element by ID
+	// 	const bubble = document.getElementById(`circle_${d.id}`);
+		
+	// 	if (!bubble) {
+	// 		console.error(`Bubble with id #circle_${d.id} not found.`);
+	// 		return;
+	// 	}
+
+	// 	console.log(`Bubble with id #circle_${d.id} successfully selected.`);
+
+	// 	// Clear any previous event listeners to avoid multiple triggers
+	// 	bubble.removeEventListener("mouseenter", startHoverTimer);
+	// 	bubble.removeEventListener("mouseleave", clearHoverTimer);
+
+	// 	// Define the timer function outside the events for clarity
+	// 	function startHoverTimer() {
+	// 		console.log(`Mouse entered bubble ${d.id}, starting hover timer...`);
+	// 		hoverTimer = setTimeout(() => {
+	// 			console.log(`Hovering for ${hoverDelay / 1000} seconds, showing documents.`);
+	// 			showDocuments(d);
+	// 		}, hoverDelay);
+	// 	}
+
+	// 	function clearHoverTimer() {
+	// 		console.log(`Mouse left bubble ${d.id}, clearing hover timer.`);
+	// 		clearTimeout(hoverTimer);
+	// 	}
+
+	// 	// Attach mouseenter and mouseleave events to start and clear the timer
+	// 	bubble.addEventListener("mouseenter", startHoverTimer);
+	// 	bubble.addEventListener("mouseleave", clearHoverTimer);
+
+
+	// 	const selected_bibs = current_selection_trace.current_selected_bibs;
+	// 	var edge_text = (opened_edges_id.has(d.id)) ? 'Hide Edges' : 'Show Edges';
+
+	// 	const num_authors = d.keywords.length.toString();
+	// 	var num_author_text = num_authors + ' authors';
+	// 	if (num_authors == 1) {
+	// 		num_author_text = num_authors + ' author';
+	// 	}
+
+	// 	const num_docs = Object.keys(d.bibs).length;
+	// 	const suffix = (dataset_opt == 'Experts') ? ' expert' : ' document';
+	// 	var num_doc_text = num_docs + suffix + 's';
+	// 	if (num_docs == 1) {
+	// 		num_doc_text = num_docs + suffix;
+	// 	}
+
+	// 	var info_text = num_doc_text
+	// 	if (entity == 'authors') {
+	// 		info_text = num_author_text + `\/${num_docs} docs`
+	// 	}
+
+	// 	// if(selected_bibs.size>=zoom_in_threshold){
+	// 	// 	if(current_selection_trace.level > 0) {
+	// 	// 		var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Zoom in', 'Zoom out', 'Close Menu');
+	// 	// 		//var menu = contextMenu().items('Show Documents');
+
+	// 	// 	} else {
+	// 	// 		var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Zoom in', 'Close Menu');
+	// 	// 		//var menu = contextMenu().items('Show Documents');
+	// 	// 	}
+	// 	// }else{
+	// 	// 	if(current_selection_trace.level > 0) {
+	// 	// 		var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Zoom out', 'Close Menu');
+	// 	// 		//var menu = contextMenu().items('Show Documents');
+	// 	// 	} else {
+	// 	// 		var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Close Menu');
+	// 	// 		//var menu = contextMenu().items('Show Documents');
+	// 	// 	}
+	// 	// }
+	// 	// //menu(d.optimized_cx - d.actual_radius * min_resize_factor, d.optimized_cx + d.actual_radius * min_resize_factor, d.optimized_cy - 0.5 * d.actual_radius * min_resize_factor, d.id);
+	// 	// if (opened_id != d.id) {
+	// 	// 	menu(d.optimized_cx, d.optimized_cx + d.actual_radius * min_resize_factor, d.optimized_cy - 0.5 * d.actual_radius * min_resize_factor, d.id);
+	// 	// 	opened_id = d.id;
+	// 	// }
+
+	// 	// var width = 1.0*document.getElementById("cluster").offsetWidth;
+	// 	// var height = document.getElementById("cluster").offsetHeight;
+
+	// 	// if (d.id == undefined){
+	// 	// 	//console.log(this.id);
+	// 	// 	id = this.id.slice(-1)
+	// 	// 	var type = "tab";
+	// 	// } else {
+	// 	// 	id = d.id;
+	// 	// 	var type = "circle";
+	// 	// }
+	// }
 
 	function mouseover(d) {
 		const hoverDelay = 1000; // 5 seconds
@@ -984,11 +1178,11 @@ function VoiceEdges(cluster) {
 	}
 
 	// Call waitForBubbleElement with the callback to run mouseover when circle_0 is detected
-	// waitForBubbleElement("circle_0", (bubble) => {
-	// 	console.log("Bubble detected:", bubble);
-	// 	bubble.style.pointerEvents = "auto"; // Ensure pointer events are enabled
-	// 	mouseover({ id: 0 }); // Call mouseover with the detected ID
-	// });
+	waitForBubbleElement("circle_0", (bubble) => {
+		console.log("Bubble detected:", bubble);
+		bubble.style.pointerEvents = "auto"; // Ensure pointer events are enabled
+		mouseover({ id: 0 }); // Call mouseover with the detected ID
+	});
 
 
 
@@ -2478,7 +2672,28 @@ $(function() {
 			 //console.log(JSON.parse(oldSessionData))
 
 			 let newSessionData = data.newSessionData;
-			
+			 //console.log(data)
+			 //console.log(newSessionData);
+			 // Console log the old session data
+			//  console.log("oldSessionData: " + oldSessionData);
+			//  console.log("oldSessionData.state: " + JSON.parse(oldSessionData).state);
+			 // Console log the new session data
+			//  console.log("newSessionData: " + newSessionData);
+			 // New session data has [object object] as its value, so we need to parse it to see the actual data
+			//  console.log("newSessionData: " + JSON.stringify(newSessionData));
+			 
+			//  console.log("newSessionData.state: " + newSessionData.state);
+			// display id2members for each state it is of the form id2members_0, id2members_1, id2members_2, etc till the last state
+			// for (var i = 0; i <= newSessionData.state; i++) {	
+			// 	// console.log("newSessionData.id2members_" + i + ": " + newSessionData["id2members_" + i]);	
+			// 	// console.log("newSessionData.cluster_desc_" + i + ": " + newSessionData["cluster_desc_" + i]);
+			// 	// console.log("newSessionData.cluster_summary_" + i + ": " + newSessionData["cluster_summary_" + i]);
+			// 	// console.log("newSessionData.xy_" + i + ": " + newSessionData["xy_" + i]);
+			// 	// console.log("newSessionData.hue_" + i + ": " + newSessionData["hue_" + i]);
+			// 	// console.log("newSessionData.satr_" + i + ": " + newSessionData["satr_" + i]);
+			// 	// console.log("newSessionData.edges_" + i + ": " + newSessionData["edges_" + i]);
+				
+			// }	
 			 /* update session storage with updated data */
 			 sessionStorage.setItem('sessionData', JSON.stringify(newSessionData));
 			 //formatting the new data
@@ -3307,7 +3522,7 @@ $(document).ready(function() {
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-<script>
+<!-- <script>
     let lastCheckedLength = 0; // Variable to store the last known length of data
 
     async function checkNewGazeData() {
@@ -3331,6 +3546,31 @@ $(document).ready(function() {
         }
     }
 
+	// Function to clear webgazerGlobalData every 10 seconds
+    let sessionKey = `webgazerSession_${Date.now()}`; // Unique key for each session
+
+	// function clearGazeData() {
+	// 	localforage.setItem('webgazerGlobalData', []).then(() => {
+	// 		console.log("webgazerGlobalData cleared and reset to an empty array.");
+
+	// 		// Log the current state of webgazerGlobalData after clearing
+	// 		localforage.getItem('webgazerGlobalData').then((data) => {
+	// 			console.log("Current webgazerGlobalData after reset:", data);
+	// 			lastCheckedLength = 0; // Reset lastCheckedLength
+	// 		});
+	// 	}).catch((error) => {
+	// 		console.error("Error resetting webgazerGlobalData:", error);
+	// 	});
+	// }
+
+
+	// Usage example in webgazer listener:
+	async function saveGazeData(data) {
+		const existingData = await localforage.getItem(sessionKey) || [];
+		existingData.push(data);
+		await localforage.setItem(sessionKey, existingData);
+		console.log("Saved data to new session key:", sessionKey);
+	}
 
 	async function saveGazeDataToDB() {
 		try {
@@ -3362,7 +3602,7 @@ $(document).ready(function() {
 	}
 
 	// Call saveGazeData every 10 seconds
-	setInterval(saveGazeDataToDB, 30000);
+	setInterval(saveGazeDataToDB, 20000);
 
 
     // Run the checkNewGazeData function every 2 seconds
@@ -3371,11 +3611,34 @@ $(document).ready(function() {
 	// Clear webgazerGlobalData every 10 seconds
     // setInterval(clearGazeData, 10000);
 
+	async function loadLatestGazeData() {
+		try {
+			const response = await fetch('/get_latest_gaze_data');
+			const data = await response.json();
 
-	// // Call this function on page load or after the user logs in
-	// document.addEventListener("DOMContentLoaded", loadLatestGazeData);
+			if (data.status === "success") {
+				const gazeData = data.gaze_data;
 
-</script>
+				if (gazeData) {
+					// Set localforage with the retrieved data if it exists
+					await localforage.setItem('webgazerGlobalData', gazeData);
+					console.log("Loaded latest gaze data into localforage:", gazeData);
+				} else {
+					// No previous data, so localforage will be empty
+					console.log("No previous gaze data found. Starting from scratch.");
+				}
+			} else {
+				console.error("Error retrieving gaze data:", data.error);
+			}
+		} catch (error) {
+			console.error("Error fetching latest gaze data:", error);
+		}
+	}
+
+	// Call this function on page load or after the user logs in
+	document.addEventListener("DOMContentLoaded", loadLatestGazeData);
+
+</script> -->
 
 
 
