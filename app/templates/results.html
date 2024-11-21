@@ -62,7 +62,8 @@
 
 				if (gazeData) {
 					// Set localforage with the retrieved data if it exists
-					localforage.setItem('webgazerGlobalData', gazeData);
+					// localforage.setItem('webgazerGlobalData', gazeData);
+					webgazer.setStoredPoints(gazeData);
 					console.log("Loaded latest gaze data into localforage:", gazeData);
 				} else {
 					// No previous data, so localforage will be empty
@@ -86,12 +87,12 @@
 		if (webgazer) {
 			console.log("WebGazer.js loaded successfully.");
 
-			webgazer.setGazeListener(function (latest_data, elapsedTime) {
-				if (latest_data == null) {
+			webgazer.setGazeListener(function (data, elapsedTime) {
+				if (data == null) {
 					return;
 				}
-				var xprediction = latest_data.x; // X coordinate of gaze
-				var yprediction = latest_data.y; // Y coordinate of gaze
+				var xprediction = data.x; // X coordinate of gaze
+				var yprediction = data.y; // Y coordinate of gaze
 				//   console.log("Gaze prediction:", xprediction, yprediction);
 			}).begin();  // Start WebGazer
 
@@ -117,10 +118,13 @@
 			console.error("Failed to load WebGazer.js.");
 		}
 	}
-
-	// Call startWebGazer on page load or after the user logs in
-	document.addEventListener("DOMContentLoaded", startWebGazer);
 	
+	
+	// Call startWebGazer on page load or after the user logs in
+	// document.addEventListener("DOMContentLoaded", startWebGazer);
+	$(function(){
+		startWebGazer()
+	})
 </script>
 
 
