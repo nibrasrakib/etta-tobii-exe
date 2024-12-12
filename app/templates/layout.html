@@ -118,14 +118,14 @@
 				{% endif %}
 				{% if is_authenticated %}
 				<a href="{{url_for('logout', target=url_for('home'))}}" id="signout-1" class="btn btn-primary"
-					style="background: dodgerblue;opacity: .70; margin-left:15px; margin-right: 5px;"><i
+					style="background: #4c6d92;opacity: .70; margin-left:15px; margin-right: 5px;"><i
 						class="fa fa-sign-out"></i> Sign out</a>
 				{% else %}
 				<a href="{{url_for('login', target=url_for('home'))}}" id="signin-1" class="btn btn-primary"
-					style="background: dodgerblue;opacity: .70; margin-left:15px; margin-right: 5px;"><i
+					style="background: #4c6d92;opacity: .70; margin-left:15px; margin-right: 5px;"><i
 						class="fa fa-sign-in"></i> Sign in</a>
 				<a href="{{url_for('register', target=url_for('home'))}}" id="signup" class="btn btn-primary"
-					style="background: dodgerblue;opacity: .70; margin-left:10px; margin-right: 5px"><i
+					style="background: #4c6d92;opacity: .70; margin-left:10px; margin-right: 5px"><i
 						class="fa fa-user-plus"></i> Register</a>
 				{% endif %}
 

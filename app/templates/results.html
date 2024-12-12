@@ -46,9 +46,10 @@
 		display: none
 	}
 </style>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script> -->
 <script src="{{ url_for('static', filename='webgazer.js') }}" type="text/javascript"></script>
 <!-- Setup the webgazer cursor setGazeListener and begin calibration -->
-<script>
+<!-- <script>
 	// // Ensure that WebGazer is available
 
 	// Function to load the latest gaze data from the backend and set it in localforage
@@ -59,10 +60,12 @@
 
 			if (data.status === "success") {
 				const gazeData = data.gaze_data;
-
+				// Print the number of data points retrieved
+				console.log("Number of gaze data points retrieved:", gazeData.length);
 				if (gazeData) {
 					// Set localforage with the retrieved data if it exists
 					// localforage.setItem('webgazerGlobalData', gazeData);
+					console.log("Loading:", gazeData);
 					webgazer.setStoredPoints(gazeData);
 					console.log("Loaded latest gaze data into localforage:", gazeData);
 				} else {
@@ -75,6 +78,7 @@
 			return data;
 		} catch (error) {
 			console.error("Error fetching latest gaze data:", error);
+			return null;
 		}
 	}
 	// Function to initialize WebGazer
@@ -87,6 +91,7 @@
 		if (webgazer) {
 			console.log("WebGazer.js loaded successfully.");
 
+			let lastElement = null; // Store the last element hovered over
 			webgazer.setGazeListener(function (data, elapsedTime) {
 				if (data == null) {
 					return;
@@ -94,6 +99,19 @@
 				var xprediction = data.x; // X coordinate of gaze
 				var yprediction = data.y; // Y coordinate of gaze
 				//   console.log("Gaze prediction:", xprediction, yprediction);
+
+				const element = document.elementFromPoint(xprediction, yprediction);
+
+				if (element && element !=lastElement){
+					// console.log("Element hovered over:", element);
+					gazeStart = performance.now();
+					if (lastElement) {
+						lastElement.style.border = "none";
+					}
+					element.style.border = "2px solid red";
+					lastElement = element;
+					console.log("Element hovered over:", element);
+				}
 			}).begin();  // Start WebGazer
 
 			
@@ -125,7 +143,292 @@
 	$(function(){
 		startWebGazer()
 	})
+</script> -->
+
+<script>
+    // Function to load the latest gaze data from the backend and set it in WebGazer
+	async function loadLatestGazeData() {
+		try {
+			const response = await fetch('/get_latest_gaze_data');
+			const data = await response.json();
+
+			if (data.status === "success") {
+				const gazeData = data.gaze_data || [];
+				console.log("Number of gaze data points retrieved:", gazeData.length);
+
+				if (gazeData.length > 0) {
+					// Set WebGazer's stored points if data exists
+					try {
+						webgazer.setStoredPoints(gazeData);
+						console.log("Loaded latest gaze data:", gazeData);
+					} catch (error) {
+						console.error("Error setting WebGazer stored points:", error);
+					}
+				} else {
+					console.log("No previous gaze data found. Starting from scratch.");
+				}
+			} else {
+				console.error("Error retrieving gaze data:", data.error);
+			}
+		} catch (error) {
+			console.error("Error fetching latest gaze data:", error);
+		}
+	}
+
+	// // Function to initialize WebGazer
+	// async function startWebGazer() {
+	// 	// Load the latest gaze data before initializing WebGazer
+	// 	await loadLatestGazeData();
+
+	// 	if (webgazer) {
+	// 		console.log("WebGazer.js loaded successfully.");
+
+	// 		let lastElement = null; // Store the last hovered element
+	// 		let hoverTimeout = null; // Timeout to track hover duration
+	// 		const hoverTimeThreshold = 1000; // Time in milliseconds to confirm hover
+
+	// 		// webgazer.setGazeListener((data, elapsedTime) => {
+	// 		// 		if (data == null) return;
+
+	// 		// 		const x = data.x;
+	// 		// 		const y = data.y;
+
+	// 		// 		// Get the DOM element under the gaze point
+	// 		// 		const element = document.elementFromPoint(x, y);
+
+	// 		// 		// Check if it's a `<circle>` with class "cover"
+	// 		// 		if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover")) {
+	// 		// 			if (element !== lastElement) {
+	// 		// 				// New element hovered, reset timer
+	// 		// 				if (hoverTimeout) {
+	// 		// 					clearTimeout(hoverTimeout);
+	// 		// 				}
+
+	// 		// 				// Set timeout to detect sustained hover
+	// 		// 				hoverTimeout = setTimeout(() => {
+	// 		// 					console.log("Hovered over a circle with class 'cover' for", hoverTimeThreshold, "ms:", element);
+	// 		// 					console.log(
+	// 		// 						"Attributes: r =", element.getAttribute("r"),
+	// 		// 						", cx =", element.getAttribute("cx"),
+	// 		// 						", cy =", element.getAttribute("cy")
+	// 		// 					);
+
+	// 		// 					// Simulate a click event on the element
+	// 		// 					element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+	// 		// 					console.log("Simulated click event on:", element);
+	// 		// 				}, hoverTimeThreshold);
+
+	// 		// 				// Update lastElement
+	// 		// 				lastElement = element;
+	// 		// 			}
+	// 		// 		} else {
+	// 		// 			// Not hovering over a valid element; reset hover tracking
+	// 		// 			if (hoverTimeout) {
+	// 		// 				clearTimeout(hoverTimeout);
+	// 		// 			}
+	// 		// 			lastElement = null;
+	// 		// 		}
+	// 		// }).begin();
+	// 		console.log("WebGazer object:", webgazer);
+	// 		webgazer.setGazeListener((data, elapsedTime) => {
+	// 			if (data == null) return;
+
+	// 			const x = data.x;
+	// 			const y = data.y;
+
+	// 			// Get all circles with class "cover"
+	// 			const circles = document.querySelectorAll("circle.cover");
+
+	// 			// Iterate through circles to find one within the 10% threshold
+	// 			for (const circle of circles) {
+	// 				const cx = parseFloat(circle.getAttribute("cx"));
+	// 				const cy = parseFloat(circle.getAttribute("cy"));
+	// 				const r = parseFloat(circle.getAttribute("r"));
+
+	// 				// Calculate the Euclidean distance from gaze point to circle center
+	// 				const distance = Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2));
+
+	// 				// Check if the distance is within the radius plus 10%
+	// 				if (distance <= r * 1.1) {
+	// 					if (circle !== lastElement) {
+	// 						// New circle hovered, reset timer
+	// 						if (hoverTimeout) {
+	// 							clearTimeout(hoverTimeout);
+	// 						}
+
+	// 						// Set timeout to detect sustained hover
+	// 						hoverTimeout = setTimeout(() => {
+	// 							console.log("Hovered over a circle with class 'cover' for", hoverTimeThreshold, "ms:", circle);
+	// 							console.log(
+	// 								"Attributes: r =", r,
+	// 								", cx =", cx,
+	// 								", cy =", cy
+	// 							);
+
+	// 							// Simulate a click event on the circle
+	// 							circle.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+	// 							console.log("Simulated click event on:", circle);
+	// 						}, hoverTimeThreshold);
+
+	// 						// Update lastElement
+	// 						lastElement = circle;
+	// 					}
+	// 					return; // Stop checking further circles if one is found
+	// 				}
+	// 			}
+
+	// 			// Not hovering over any valid circle; reset hover tracking
+	// 			if (hoverTimeout) {
+	// 				clearTimeout(hoverTimeout);
+	// 			}
+	// 			lastElement = null;
+	// 		}).begin();
+
+
+	// 		// Configure WebGazer
+	// 		webgazer.setTracker("TFFacemesh");
+	// 		webgazer.addTracker("TFFacemesh");
+	// 		webgazer.params.showFaceFeedbackBox = true;
+	// 		webgazer.params.showFaceOverlay = true;
+	// 		webgazer.params.faceMode = "single";
+	// 		// webgazer.setRegression("threadedRidge");
+	// 		webgazer.params.useKalmanFilter = true; // Force Kalman filter
+	// 		webgazer.params.regressionType = "threadedRidge"; // Force regression type
+	// 		if (typeof webgazer.setRegression === "function") {
+	// 			webgazer.setRegression("threadedRidge");
+	// 			console.log("Regression model set to threadedRidge.");
+	// 		} else {
+	// 			console.warn("setRegression method is not available in this version.");
+	// 		}
+
+	// 		if (typeof webgazer.applyKalmanFilter === "function") {
+	// 			webgazer.applyKalmanFilter(true);
+	// 			console.log("Kalman filter enabled.");
+	// 		} else {
+	// 			console.warn("applyKalmanFilter method is not available in this version.");
+	// 		}
+
+	// 		console.log("Updated WebGazer params:", webgazer.params);
+
+	// 		// webgazer.applyKalmanFilter(true); // Enable Kalman filter for smoothing
+	// 		window.saveDataAcrossSessions = true;
+
+	// 		console.log("WebGazer initialized and tracking started.");
+	// 	} else {
+	// 		console.error("Failed to load WebGazer.js.");
+	// 	}
+	// }
+
+	// // Start WebGazer after the DOM is ready
+	// $(function () {
+	// 	startWebGazer();
+	// });
+
+	// Function to initialize WebGazer
+
+	
+async function startWebGazer() {
+    await loadLatestGazeData();
+
+    if (webgazer) {
+        console.log("WebGazer.js loaded successfully.");
+        console.log("Initial WebGazer object:", webgazer);
+
+        // Configure WebGazer
+        webgazer.params.showFaceFeedbackBox = true;
+        webgazer.params.showFaceOverlay = true;
+        webgazer.params.showGazeDot = true;
+        webgazer.params.faceMode = "single";
+        webgazer.params.useKalmanFilter = true;
+        webgazer.params.regressionType = "threadedRidge";
+
+        console.log("WebGazer params after setup:", webgazer.params);
+
+        // Ensure Gaze Dot Exists
+        // if (!document.getElementById("webgazerGazeDot")) {
+        //     const gazeDot = document.createElement("div");
+        //     gazeDot.id = "webgazerGazeDot";
+        //     gazeDot.style.position = "absolute";
+        //     gazeDot.style.backgroundColor = "red";
+        //     gazeDot.style.borderRadius = "50%";
+        //     gazeDot.style.width = "10px";
+        //     gazeDot.style.height = "10px";
+        //     gazeDot.style.zIndex = "1000";
+        //     gazeDot.style.pointerEvents = "none";
+        //     document.body.appendChild(gazeDot);
+        //     console.log("Gaze dot manually created.");
+        // }
+
+        // Gaze Listener Variables
+        let lastElement = null; // Store the last hovered element
+        let hoverTimeout = null; // Timeout to track hover duration
+        const hoverTimeThreshold = 250; // Time in milliseconds to confirm hover
+
+        // Start WebGazer
+        webgazer.setGazeListener((data, elapsedTime) => {
+            if (data == null) return;
+
+            const x = data.x;
+            const y = data.y;
+
+            // // Update Gaze Dot Position
+            // const gazeDot = document.getElementById("webgazerGazeDot");
+            // if (gazeDot) {
+            //     gazeDot.style.left = `${x}px`;
+            //     gazeDot.style.top = `${y}px`;
+            // }
+
+            // Get the DOM element under the gaze point
+            const element = document.elementFromPoint(x, y);
+
+            // Check if it's a `<circle>` with class "cover"
+            if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover")) {
+                if (element !== lastElement) {
+                    // New circle hovered, reset timer
+                    if (hoverTimeout) {
+                        clearTimeout(hoverTimeout);
+                    }
+
+                    // Set timeout to detect sustained hover
+                    hoverTimeout = setTimeout(() => {
+                        console.log("Hovered over a circle with class 'cover' for", hoverTimeThreshold, "ms:", element);
+                        console.log(
+                            "Attributes: r =", element.getAttribute("r"),
+                            ", cx =", element.getAttribute("cx"),
+                            ", cy =", element.getAttribute("cy")
+                        );
+
+                        // Simulate a left-click event on the circle
+                        element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }));
+                        console.log("Simulated left-click event on:", element);
+                    }, hoverTimeThreshold);
+
+                    // Update lastElement
+                    lastElement = element;
+                }
+            } else {
+                // Not hovering over a valid element; reset hover tracking
+                if (hoverTimeout) {
+                    clearTimeout(hoverTimeout);
+                }
+                lastElement = null;
+            }
+        });
+
+        webgazer.begin();
+        console.log("WebGazer initialized and tracking started.");
+    } else {
+        console.error("Failed to load WebGazer.js.");
+    }
+}
+
+// Start WebGazer after the DOM is ready
+$(function () {
+    startWebGazer();
+});
+
 </script>
+
 
 
 <script type=text/javascript charset="utf-8">
@@ -311,7 +614,7 @@ function turnOnLoadingPrompt() {
 	document.getElementById("cluster").style.opacity = 0.2;
 	document.getElementById("query-secondary").style.opacity = 0.2;
 	document.getElementById("Explore").style.opacity = 0.2;
-	document.getElementsByTagName("nav")[0].style.opacity = 0.2;
+	document.getElementsByTagName("nav")[0].style.opacity = 0.2;
 	document.getElementById("loading").style.display="block";
 }
 
@@ -319,7 +622,7 @@ function turnOffLoadingPrompt() {
 	document.getElementById("cluster").style.opacity = 1.0;
 	document.getElementById("query-secondary").style.opacity = 1.0;
 	document.getElementById("Explore").style.opacity = 0.7;
-	document.getElementsByTagName("nav")[0].style.opacity = 0.7;
+	document.getElementsByTagName("nav")[0].style.opacity = 0.7;
 	document.getElementById("loading").style.display="none";
 }
 
@@ -948,16 +1251,49 @@ function VoiceEdges(cluster) {
 			.attr('fill', 'white')
 			.duration(500);
 
+
 	}
 
 
-	function mouseover(d) {
-		const hoverDelay = 1000; // 5 seconds
-		let hoverTimer;
+	// function mouseover(d) {
+	// 	const hoverDelay = 1000; // 5 seconds
+	// 	let hoverTimer;
 
+	// 	// Select the bubble element by ID
+	// 	const bubble = document.getElementById(`circle_${d.id}`);
+		
+	// 	if (!bubble) {
+	// 		console.error(`Bubble with id circle_${d.id} not found.`);
+	// 		return;
+	// 	}
+
+	// 	console.log(`Bubble with id circle_${d.id} successfully selected.`);
+
+	// 	// Enable pointer events on the bubble, if not already set
+	// 	bubble.style.pointerEvents = "auto";
+
+	// 	// Define hover functions
+	// 	function startHoverTimer() {
+	// 		console.log(`Mouse entered bubble ${d.id}, starting hover timer...`);
+	// 		hoverTimer = setTimeout(() => {
+	// 			console.log(`Hovering for ${hoverDelay / 1000} seconds, showing documents.`);
+	// 			showDocuments(d); // Trigger document display after 5 seconds of hover
+	// 		}, hoverDelay);
+	// 	}
+
+	// 	function clearHoverTimer() {
+	// 		console.log(`Mouse left bubble ${d.id}, clearing hover timer.`);
+	// 		clearTimeout(hoverTimer); // Clear the timer if mouse leaves early
+	// 	}
+
+	// 	// Attach event listeners to start and clear the hover timer
+	// 	bubble.addEventListener("mouseenter", startHoverTimer);
+	// 	bubble.addEventListener("mouseleave", clearHoverTimer);
+	// }
+
+	function mouseover(d) {
 		// Select the bubble element by ID
 		const bubble = document.getElementById(`circle_${d.id}`);
-		
 		if (!bubble) {
 			console.error(`Bubble with id circle_${d.id} not found.`);
 			return;
@@ -968,24 +1304,105 @@ function VoiceEdges(cluster) {
 		// Enable pointer events on the bubble, if not already set
 		bubble.style.pointerEvents = "auto";
 
-		// Define hover functions
-		function startHoverTimer() {
-			console.log(`Mouse entered bubble ${d.id}, starting hover timer...`);
-			hoverTimer = setTimeout(() => {
-				console.log(`Hovering for ${hoverDelay / 1000} seconds, showing documents.`);
-				showDocuments(d); // Trigger document display after 5 seconds of hover
-			}, hoverDelay);
+		// Display menu immediately
+		const selected_bibs = current_selection_trace.current_selected_bibs;
+		var edge_text = opened_edges_id.has(d.id) ? "Hide Edges" : "Show Edges";
+
+		const num_authors = d.keywords.length.toString();
+		var num_author_text = num_authors + " authors";
+		if (num_authors == 1) {
+			num_author_text = num_authors + " author";
 		}
 
-		function clearHoverTimer() {
-			console.log(`Mouse left bubble ${d.id}, clearing hover timer.`);
-			clearTimeout(hoverTimer); // Clear the timer if mouse leaves early
+		const num_docs = Object.keys(d.bibs).length;
+		const suffix = dataset_opt == "Experts" ? " expert" : " document";
+		var num_doc_text = num_docs + suffix + "s";
+		if (num_docs == 1) {
+			num_doc_text = num_docs + suffix;
 		}
 
-		// Attach event listeners to start and clear the hover timer
-		bubble.addEventListener("mouseenter", startHoverTimer);
-		bubble.addEventListener("mouseleave", clearHoverTimer);
+		var info_text = num_doc_text;
+		if (entity == "authors") {
+			info_text = num_author_text + `/${num_docs} docs`;
+		}
+
+		// Determine menu items based on zoom level
+		let menu;
+		if (selected_bibs.size >= zoom_in_threshold) {
+			if (current_selection_trace.level > 0) {
+				menu = contextMenu().items(
+					info_text,
+					"Show Documents",
+					edge_text,
+					"Hide All Edges",
+					"Zoom in",
+					"Zoom out",
+					"Close Menu"
+				);
+			} else {
+				menu = contextMenu().items(
+					info_text,
+					"Show Documents",
+					edge_text,
+					"Hide All Edges",
+					"Zoom in",
+					"Close Menu"
+				);
+			}
+		} else {
+			if (current_selection_trace.level > 0) {
+				menu = contextMenu().items(
+					info_text,
+					"Show Documents",
+					edge_text,
+					"Hide All Edges",
+					"Zoom out",
+					"Close Menu"
+				);
+			} else {
+				menu = contextMenu().items(
+					info_text,
+					"Show Documents",
+					edge_text,
+					"Hide All Edges",
+					"Close Menu"
+				);
+			}
+		}
+
+		// Display the menu without a timer
+		if (opened_id !== d.id) {
+			// Print 
+			console.log(`Mouse entered bubble ${d.id}, showing menu.`);
+			// Print each parameter
+			console.log(`cx: ${d.optimized_cx}`);
+			console.log(`cy: ${d.optimized_cy}`);
+			console.log(`radius: ${d.actual_radius * d.min_resize_factor}`);
+			console.log(`menu: ${menu}`);
+			menu(
+				d.optimized_cx,
+				d.optimized_cx + d.actual_radius * d.min_resize_factor,
+				d.optimized_cy - 0.5 * d.actual_radius * d.min_resize_factor,
+				d.id
+			);
+			opened_id = d.id;
+		}
+
+		// // Attach event listeners to start and clear the hover timer
+		// bubble.addEventListener("mouseenter", () => {
+		// 	console.log(`Mouse entered bubble ${d.id}, showing menu.`);
+		// 	menu(
+		// 		d.optimized_cx,
+		// 		d.optimized_cx + d.actual_radius * d.min_resize_factor,
+		// 		d.optimized_cy - 0.5 * d.actual_radius * d.min_resize_factor,
+		// 		"211"
+		// 	);
+		// 	opened_id = d.id;
+		// });
 	}
+
+
+
 
 	// Call waitForBubbleElement with the callback to run mouseover when circle_0 is detected
 	// waitForBubbleElement("circle_0", (bubble) => {
@@ -1735,6 +2152,8 @@ function citationGenerator(id){
 					 rescale = false;
 
 	function menu(x1, x2, y, circleId) {
+		// Console log the circleId
+		console.log("circleId: ", circleId);
 			 		closeMenuAndDocs();
 				 //  scaleItems();
 					// Print arguments
@@ -2054,28 +2473,31 @@ function citationGenerator(id){
 				//.on('mousemove', function(){return (tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px"));})
 				//.on('mouseout', mouseout)
 
-				//.on('contextmenu', function(d){
-				//	const selected_bibs = current_selection_trace.current_selected_bibs;
-				//	if(selected_bibs.size>=zoom_in_threshold){
-				//		if(current_selection_trace.level > 0) {
-				//			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Zoom out', 'Close Menu');
-				//		} else {
-				//			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Close Menu');
-				//		}
-				//	}else{
-				//		if(current_selection_trace.level > 0) {
-				//			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom out', 'Close Menu');
-				//		} else {
-				//			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Close Menu');
-				//		}
-				//	}
-				//	d3.event.preventDefault();
-				//	//menu(d['clientX']-1, d['clientY']-61, textLabels['_groups'][0][i].id);
-				//	console.log(d.optimized_cx);
-				//	console.log(d.optimized_cy);
-				//	console.log(d.min_resize_factor);
-				//	menu(d.optimized_cx, d.optimized_cx + d.actual_radius * d.min_resize_factor, d.optimized_cy - 0.5 * d.actual_radius * d.min_resize_factor, d.id);
-				//})
+				// .on('contextmenu', function(d){
+				// 	const selected_bibs = current_selection_trace.current_selected_bibs;
+				// 	if(selected_bibs.size>=zoom_in_threshold){
+				// 		if(current_selection_trace.level > 0) {
+				// 			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Zoom out', 'Close Menu');
+				// 		} else {
+				// 			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom in', 'Close Menu');
+				// 		}
+				// 	}else{
+				// 		if(current_selection_trace.level > 0) {
+				// 			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Zoom out', 'Close Menu');
+				// 		} else {
+				// 			var menu = contextMenu().items('Show Documents', 'Show Edges', 'Hide All Edges', 'Close Menu');
+				// 		}
+				// 	}
+				// 	d3.event.preventDefault();
+				// 	//menu(d['clientX']-1, d['clientY']-61, textLabels['_groups'][0][i].id);
+				// 	console.log(d.optimized_cx);
+				// 	console.log(d.optimized_cy);
+				// 	console.log(d.min_resize_factor);
+				// 	// Print that the menu is being called
+				// 	console.log("CALLING MENU");
+				// 	menu(d.optimized_cx, d.optimized_cx + d.actual_radius * d.min_resize_factor, d.optimized_cy - 0.5 * d.actual_radius * d.min_resize_factor, d.id);
+
+				// })
 				.transition()
 				.attr("x", function (d) {
 						return d.x;
@@ -3312,28 +3734,28 @@ $(document).ready(function() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 <script>
-    let lastCheckedLength = 0; // Variable to store the last known length of data
+    // let lastCheckedLength = 0; // Variable to store the last known length of data
 
-    async function checkNewGazeData() {
-        try {
-            // Retrieve the current data from localForage
-            const gazeData = await localforage.getItem('webgazerGlobalData');
+    // async function checkNewGazeData() {
+    //     try {
+    //         // Retrieve the current data from localForage
+    //         const gazeData = await localforage.getItem('webgazerGlobalData');
 
-            if (gazeData && Array.isArray(gazeData)) {
-                // Check if new data points have been added
-                if (gazeData.length > lastCheckedLength) {
-                    // Loop through new points and log them
-                    for (let i = lastCheckedLength; i < gazeData.length; i++) {
-                        console.log("New Gaze Data Point:", gazeData[i]);
-                    }
-                    // Update lastCheckedLength to the new length of gazeData
-                    lastCheckedLength = gazeData.length;
-                }
-            }
-        } catch (error) {
-            console.error("Error retrieving data from localForage:", error);
-        }
-    }
+    //         if (gazeData && Array.isArray(gazeData)) {
+    //             // Check if new data points have been added
+    //             if (gazeData.length > lastCheckedLength) {
+    //                 // Loop through new points and log them
+    //                 for (let i = lastCheckedLength; i < gazeData.length; i++) {
+    //                     console.log("New Gaze Data Point:", gazeData[i]);
+    //                 }
+    //                 // Update lastCheckedLength to the new length of gazeData
+    //                 lastCheckedLength = gazeData.length;
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error("Error retrieving data from localForage:", error);
+    //     }
+    // }
 
 
 	async function saveGazeDataToDB() {
@@ -3370,7 +3792,7 @@ $(document).ready(function() {
 
 
     // Run the checkNewGazeData function every 2 seconds
-    setInterval(checkNewGazeData, 2000);
+    // setInterval(checkNewGazeData, 2000);
 
 	// Clear webgazerGlobalData every 10 seconds
     // setInterval(clearGazeData, 10000);

@@ -21,7 +21,8 @@
 					alert("The COVID-19 Open Research Dataset (CORD-19) is now an option within PATTIE. You can use search terms, but a query is not required.\n\nThis dataset is part of the Call to Action on the tech community requested by The White House Office of Science and Technology Policy.\n\nThe dataset represents the most extensive machine-readable Coronavirus literature collection available for data and text mining to date with more than 13,000 full text articles.")
 					</script>-->
 			</dt>
-			<div class='select'>
+			<!-- Make bottom div hidden -->
+			<div class='select' style="display:none">
 				<select style=text-align:center;color:grey;background-color:white;opacity:0.80 name="dataset_opt"
 					id='dataset_opt' onChange='changeField(this.value)' data-intro='- Select your dataset here. <dt>
 																																															- Note that you may upload your own dataset by selecting "upload".'>
@@ -31,12 +32,13 @@
 					<option value="NewsAPI">News</option>
 					<option value="Experts">Academic Experts</option>
 				</select>
-				<div class="select__arrow" id="select_arrow">
+				<div class="select__arrow" id="select_arrow" style="display: none;"></div>
 
 				</div>
 
 
-				<div class="select" onClick='hideOption()' style="width:100%; display: inline-block;">
+				<!-- <div class="select" onClick='hideOption()' style="width:100%; display: inline-block;"> -->
+				<div class="select" style="display: none;">
 					<select style="color:#7b7b7b;opacity: 0.7;background-color:white;width:100%;text-align:center"
 						name="num_cls" id="num_cls" onChange='changeClusterNumber(this.value)'
 						data-intro='You can also specify the number of clusters you want to see!'>
@@ -51,7 +53,7 @@
 						<option value="9">9 Clusters</option>
 						<option value="10">10 Clusters</option>
 					</select>
-					<div class="select__arrow">
+					<div class="select__arrow" id="select_arrow" style="display: none;">
 
 					</div>
 				</div>
@@ -85,7 +87,7 @@
 				<div>
 					<input type="file" id="inputfile" name="inputfile" style="visibility:hidden">
 					<button type="button" id="delete" style="visibility:hidden">Delete File</button>
-					<button type="button" onclick="redirectUpload()" id="upload" style="visibility:visible">Upload
+					<button type="button" onclick="redirectUpload()" id="upload" style="visibility:hidden">Upload
 						Data</button>
 				</div>
 		</dl>
