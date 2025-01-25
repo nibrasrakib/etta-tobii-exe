@@ -183,9 +183,20 @@ def home():
         is_authenticated=current_user.is_authenticated,
     )
     
-@app.route('/calibration')
+# @app.route('/calibration')
+# def calibration():
+#     return render_template('calibration.html')
+
+@app.route("/calibration", methods=["GET"])
 def calibration():
-    return render_template('calibration.html')
+    query = request.args.get("query", "")
+    num_cls = request.args.get("num_cls", 10)
+    # Retrieve sessionData from Flask session
+    sessionData = session.get("sessionData", {})
+
+    # Pass sessionData and other parameters to the calibration template
+    return render_template("calibration.html", query=query, num_cls=num_cls, sessionData=sessionData)
+
 
 @app.route('/save_gaze_data', methods=['POST'])
 def save_gaze_data():
@@ -772,6 +783,82 @@ def get_num_cls_for_digi(num_docs):
         return 5
     else:
         return 3
+
+
+@app.route("/results", methods=["GET"])
+def results():
+    # Retrieve sessionData from Flask session or POST request
+    sessionData = session.get("sessionData", {})
+    results_data = session.get("results_data", {})
+    # Print results_data
+    # print("results_data: ", results_data)
+    login = results_data.get("login", "false")
+    loginType = results_data.get("loginType", "none")
+    username = results_data.get("username", "username")
+    query = results_data.get("query", "")
+    num_cls = results_data.get("num_cls", 10)
+    decoratedQuery = results_data.get("decoratedQuery", "")
+    error = results_data.get("error", None)
+    keywords = results_data.get("keywords", "")
+    df = results_data.get("df", "")
+    dfr = results_data.get("dfr", "")
+    cluster_desc = results_data.get("cluster_desc", "")
+    cluster_summary = results_data.get("cluster_summary", "")
+    xy = results_data.get("xy", "")
+    edges = results_data.get("edges", "")
+    id2freq = results_data.get("id2freq", "")
+    xy_inter = results_data.get("xy_inter", "")
+    hue = results_data.get("hue", "")
+    satr = results_data.get("satr", "")
+    val = results_data.get("val", "")
+    id2members = results_data.get("id2members", "")
+    sources = results_data.get("sources", "")
+    dataset = results_data.get("dataset", "")
+    response_time = results_data.get("response_time", "")
+    path = results_data.get("path", "")
+    ear_date = results_data.get("ear_date", "")
+    lat_date = results_data.get("lat_date", "")
+    last_up = results_data.get("last_up", "")
+    print("Arguments passed to results page: ")
+    # Print all arguments being passed to the results page
+    print("login: ", login, "loginType: ", loginType, "username: ", 
+          username, "query: ", query, "num_cls: ", num_cls,
+          "dataset: ", dataset, "response_time: ", 
+          response_time, "ear_date: ", ear_date, "lat_date: ", lat_date, "last_up: ", last_up)
+
+    # path = sessionData.get("path", "/some/default/path")
+
+    return render_template(
+        "results.html",
+        query=query,
+        num_cls=num_cls,
+        sessionData=sessionData,
+        path=path, # Pass the path variable
+        login=login,
+        loginType=loginType,
+        username=username,
+        decoratedQuery=decoratedQuery,
+        error=error,
+        keywords=keywords,
+        df=df,
+        dfr=dfr,
+        cluster_desc=cluster_desc,
+        cluster_summary=cluster_summary,
+        xy=xy,
+        edges=edges,
+        id2freq=id2freq,
+        xy_inter=xy_inter,
+        hue=hue,
+        satr=satr,
+        val=val,
+        id2members=id2members,
+        sources=sources,
+        dataset=dataset,
+        response_time=response_time,
+        ear_date=ear_date,
+        lat_date=lat_date,
+        last_up=last_up,
+    )
 
 
 @app.route("/cluster", methods=["POST", "GET"])
@@ -1581,39 +1668,54 @@ def cluster():
         q = q + "_" + entity
     print("state in cluster: ", state)
     print("exit cluster")
-    return render_template(
-        "results.html",
-        sessionData=sessionData,
-        login=login,
-        loginType=loginType,
-        username=username,
-        query=raw_query,
-        decoratedQuery=q,
-        error=error,
-        keywords=keywords,
-        df=df_new,
-        dfr=dfr_new,
-        # cluster_desc=cluster_desc,
-        cluster_desc=cluster_title,
-        cluster_summary = cluster_summary,
-        xy=cluster_centers_list,
-        edges=edges,
-        id2freq=id2freq,
-        xy_inter=coordinates_list,
-        hue=hue,
-        satr=satr,
-        val=val,
-        id2members=id2members,
-        sources=sources,
-        dataset=dataset,
-        response_time=response_time,
-        path=path,
-        num_cls=num_cls,
-        ear_date=ear_date,
-        lat_date=lat_date,
-        last_up=last_up,
-    )
+    # return render_template(
+    #     "results.html",
+    #     sessionData=sessionData,
+    #     login=login,
+    #     loginType=loginType,
+    #     username=username,
+    #     query=raw_query,
+    #     decoratedQuery=q,
+    #     error=error,
+    #     keywords=keywords,
+    #     df=df_new,
+    #     dfr=dfr_new,
+    #     # cluster_desc=cluster_desc,
+    #     cluster_desc=cluster_title,
+    #     cluster_summary = cluster_summary,
+    #     xy=cluster_centers_list,
+    #     edges=edges,
+    #     id2freq=id2freq,
+    #     xy_inter=coordinates_list,
+    #     hue=hue,
+    #     satr=satr,
+    #     val=val,
+    #     id2members=id2members,
+    #     sources=sources,
+    #     dataset=dataset,
+    #     response_time=response_time,
+    #     path=path,
+    #     num_cls=num_cls,
+    #     ear_date=ear_date,
+    #     lat_date=lat_date,
+    #     last_up=last_up,
+    # )
     
+    session["sessionData"] = sessionData
+    session["results_data"] = {
+                                "login": login, "loginType": loginType, "username": username, "query": raw_query, "decoratedQuery": q, "error": error, 
+                                "keywords": keywords, "df": df_new, "dfr": dfr_new, "cluster_desc": cluster_title, "cluster_summary": cluster_summary, 
+                                "xy": cluster_centers_list, "edges": edges, "id2freq": id2freq, "xy_inter": coordinates_list, "hue": hue, "satr": satr, 
+                                "val": val, "id2members": id2members, "sources": sources, "dataset": dataset, "response_time": response_time, "path": path, 
+                                "num_cls": num_cls, "ear_date": ear_date, "lat_date": lat_date, "last_up": last_up
+                            }            
+    return redirect(url_for("calibration", 
+                            query=raw_query,
+                            num_cls=num_cls,
+    ))
+
+
+
     
 
 

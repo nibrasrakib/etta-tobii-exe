@@ -1,135 +1,111 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
-        <TITLE>WebGazer Demo</TITLE>
-        <link rel="stylesheet" type="text/css" href="./css/style.css">
-        <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
-        <script src="./webgazer.js"></script>
-    </head>
-    <body LANG="en-US" LINK="#0000ff" DIR="LTR">
-      <canvas id="plotting_canvas" width="500" height="500" style="cursor:crosshair;"></canvas>
 
-        <script src="./node_modules/sweetalert/dist/sweetalert.min.js"></script>
-        <script src="./js/main.js"></script>
-        <script src="./js/calibration.js"></script>
-        <script src="./js/precision_calculation.js"></script>
-        <script src="./js/precision_store_points.js"></script>
+<head>
+  <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+  <TITLE>WebGazer Calibration</TITLE>
+  <link rel="stylesheet" type="text/css" href="./../static/calibration/style.css">
+  <link rel="stylesheet" href="./../static/calibration/bootstrap.min.css">
+  <script src="./../static/webgazer.js"></script>
+  <!-- SweetAlert2 Library -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <nav id="webgazerNavbar" class="navbar navbar-expand-lg navbar-default navbar-fixed-top">
-          <div class="container-fluid">
-            <div class="navbar-header">
-              <!-- The hamburger menu button -->
-              <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#myNavbar">
-                <span class="navbar-toggler-icon">Menu</span>
-              </button>
-            </div>
-            <div class="collapse navbar-collapse" id="myNavbar">
-              <ul class="nav navbar-nav">
-                <!-- Accuracy -->
-                <li id="Accuracy"><a>Not yet Calibrated</a></li>
-                <li><a onclick="Restart()" href="#">Recalibrate</a></li>
-                <li><a onclick="webgazer.applyKalmanFilter(!webgazer.params.applyKalmanFilter)" href="#">Toggle Kalman Filter</a></li>
-              </ul>
-              <ul class="nav navbar-nav navbar-right">
-                <li><a class="helpBtn" onclick="helpModalShow()" href="#"><span class="glyphicon glyphicon-cog"></span> Help</a></li>
-              </ul>
-            </div>
-          </div>
-        </nav>
+</head>
 
-        <!-- Calibration points -->
-        <div class="calibrationDiv">
-            <input type="button" class="Calibration" id="Pt1"></input>
-            <input type="button" class="Calibration" id="Pt2"></input>
-            <input type="button" class="Calibration" id="Pt3"></input>
-            <input type="button" class="Calibration" id="Pt4"></input>
-            <input type="button" class="Calibration" id="Pt5"></input>
-            <input type="button" class="Calibration" id="Pt6"></input>
-            <input type="button" class="Calibration" id="Pt7"></input>
-            <input type="button" class="Calibration" id="Pt8"></input>
-            <input type="button" class="Calibration" id="Pt9"></input>
+<body LANG="en-US" LINK="#0000ff" DIR="LTR">
+  <canvas id="plotting_canvas" width="500" height="500" style="cursor:crosshair;"></canvas>
+
+  <script src="./../static/calibration/main.js"></script>
+  <script src="./../static/calibration/calibration.js"></script>
+  <script src="./../static/calibration/precision_calculation.js"></script>
+  <script src="./../static/calibration/precision_store_points.js"></script>
+
+  <nav id="webgazerNavbar" class="navbar navbar-expand-lg navbar-light fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <!-- The hamburger menu button -->
+        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#myNavbar">
+          <span class="navbar-toggler-icon">Menu</span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
+          <li id="Accuracy"><a>Not yet Calibrated</a></li>
+          <li><a onclick="Restart()" href="#">Recalibrate</a></li>
+          <li><a onclick="webgazer.applyKalmanFilter(!webgazer.params.applyKalmanFilter)" href="#">Toggle Kalman Filter</a></li>
+          <li><a onclick="completeCalibration()" href="#" class="btn btn-success" style="color: white;">Complete Calibration</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a class="helpBtn" onclick="helpModalShow()" href="#"><span class="glyphicon glyphicon-cog"></span> Help</a></li>
+        </ul>
+      </div>      
+    </div>
+  </nav>
+
+  <!-- Calibration points -->
+  <div class="calibrationDiv">
+    <input type="button" class="Calibration" id="Pt1"></input>
+    <input type="button" class="Calibration" id="Pt2"></input>
+    <input type="button" class="Calibration" id="Pt3"></input>
+    <input type="button" class="Calibration" id="Pt4"></input>
+    <input type="button" class="Calibration" id="Pt5"></input>
+    <input type="button" class="Calibration" id="Pt6"></input>
+    <input type="button" class="Calibration" id="Pt7"></input>
+    <input type="button" class="Calibration" id="Pt8"></input>
+    <input type="button" class="Calibration" id="Pt9"></input>
+  </div>
+
+  <!-- Modal -->
+  <div id="helpModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <img src="../static/calibration/calibration.png" width="100%" height="100%"
+            alt="webgazer demo instructions"></img>
         </div>
-
-        <!-- Modal -->
-        <div id="helpModal" class="modal fade" role="dialog">
-          <div class="modal-dialog">
-
-            <!-- Modal content-->
-            <div class="modal-content">
-              <div class="modal-body">
-                <img src="media/example/calibration.png" width="100%" height="100%" alt="webgazer demo instructions"></img>
-              </div>
-              <div class="modal-footer">
-                <button id="closeBtn" type="button" class="btn btn-default" data-bs-dismiss="modal">Close & load saved model </button>
-                <button type="button" id="start_calibration" class="btn btn-primary" data-bs-dismiss="modal" onclick="startCalibration()">Calibrate</button>
-              </div>
-            </div>
-
-          </div>
+        <div class="modal-footer">
+          <button id="closeBtn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close & load saved model
+          </button>
+          <button type="button" id="start_calibration" class="btn btn-primary" data-bs-dismiss="modal"
+            onclick="Restart()">Calibrate</button>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Latest compiled JavaScript -->
-        <script src="./js/resize_canvas.js"></script>
-        <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- JavaScript to handle calibration and redirection -->
+  <script>
+    // Automatically start calibration when the page is loaded
+    // window.onload = function () {
+    //   console.log("Starting calibration process");
+    //   // Restart();
+    // };
+    // Retrieve sessionData from the server-side Flask session
+    const sessionData = {{ sessionData| tojson | safe }};
+    console.log("Session Data Loaded:", sessionData);
 
-        <!-- Include localForage library -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    // Complete Calibration
+    function completeCalibration() {
+      console.log("Calibration complete. Redirecting to results...");
 
-        <script>
-            // Function to start calibration and then send the data to the server
-            function startCalibration() {
-                Restart(); // Calls your existing function to start calibration
+      // Redirect to /results (sessionData remains in the Flask session)
+      const query = "{{ query }}";
+      const num_cls = "{{ num_cls }}";
 
-                // Delay sending the data to allow calibration to complete
-                setTimeout(downloadCalibrationData, 5000); // Adjust timeout as necessary
-            }
+      const redirectUrl = `/results?query=${query}&num_cls=${num_cls}`;
+      window.location.href = redirectUrl;
+    }
+  </script>
+  <!--  
+   Calibration Complete Button 
+  <div class="text-center">
+    <button id="calibration_complete_btn" onclick="completeCalibration()" class="btn btn-success">
+      Complete Calibration
+    </button>
+  </div>-->
 
-            // Function to download calibration data and send to the server
-            // async function downloadCalibrationData() {
-            //     try {
-            //         // Retrieve data from localForage
-            //         const calibrationData = await localforage.getItem('webgazerGlobalData');
-                    
-            //         if (calibrationData) {
-            //             // Send calibration data to the server
-            //             fetch("/save_calibration_data", {
-            //                 method: "POST",
-            //                 headers: {
-            //                     "Content-Type": "application/json"
-            //                 },
-            //                 body: JSON.stringify({
-            //                     calibration_data: calibrationData
-            //                 })
-            //             })
-            //             .then(response => response.json())
-            //             .then(data => {
-            //                 alert("Calibration data saved successfully!");
-            //             })
-            //             .catch(error => console.error("Error:", error));
-            //         } else {
-            //             alert("No calibration data found!");
-            //         }
-            //     } catch (error) {
-            //         console.error("Error retrieving data from localForage:", error);
-            //     }
-            // }
-            async function downloadCalibrationData() {
-                try {
-                    // Retrieve data from localForage
-                    const calibrationData = await localforage.getItem('webgazerGlobalData');
-                    
-                    if (calibrationData) {
-                        // Print the retrieved calibration data to the console
-                        console.log("Calibration Data:", calibrationData);
-                    } else {
-                        console.log("No calibration data found in localForage.");
-                    }
-                } catch (error) {
-                    console.error("Error retrieving data from localForage:", error);
-                }
-            }
-        </script>
+  <script src="./../static/calibration/resize_canvas.js"></script>
+  <script src="./../static/calibration/bootstrap.bundle.min.js"></script>
+</body>
 
-    </body>
 </html>
