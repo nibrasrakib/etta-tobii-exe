@@ -8,11 +8,18 @@ import visual_library_plos as vl
 import logging
 import re
 
+# TOBII 
+from flask_socketio import SocketIO
+
+
 # setup logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# TOBII
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # database
 db = SQLAlchemy(app)

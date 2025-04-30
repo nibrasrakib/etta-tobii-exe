@@ -28,13 +28,18 @@ import numpy as np
 from app import app, tokenize, exclude, stopwords, MINDF
 from db.db_get_data import get_dc_data
 
-# import argparse
-# import sys
-# import operator
-import math
+####
+# Tobii related imports
+from app import socketio
+from flask_socketio import emit
+import tobii_research as tr
+import threading
 
-# import gzip
-# import random
+
+####
+
+
+import math
 import os
 import time
 
@@ -52,7 +57,7 @@ from elasticsearch import Elasticsearch
 from openai import OpenAI
 from generate_summary import generate_summary
 from cluster_postgreSQL import get_date_summary
-from app.models import WebGazeData
+# from app.models import WebGazeData
 from app import app, db
 
 import logging
@@ -198,50 +203,50 @@ def calibration():
     return render_template("calibration.html", query=query, num_cls=num_cls, sessionData=sessionData)
 
 
-@app.route('/save_gaze_data', methods=['POST'])
-def save_gaze_data():
-    if not current_user.is_authenticated:
-        return jsonify({"error": "User not authenticated"}), 401
+# @app.route('/save_gaze_data', methods=['POST'])
+# def save_gaze_data():
+#     if not current_user.is_authenticated:
+#         return jsonify({"error": "User not authenticated"}), 401
 
-    data = request.json
-    gaze_data = data.get('gaze_data')
-    timestamp = datetime.now()
+#     data = request.json
+#     gaze_data = data.get('gaze_data')
+#     timestamp = datetime.now()
 
-    if not gaze_data:
-        return jsonify({"error": "No gaze data provided"}), 400
+#     if not gaze_data:
+#         return jsonify({"error": "No gaze data provided"}), 400
 
-    # Create a new WebGazeData entry and save it to the database
-    new_entry = WebGazeData(
-        username=current_user.username,
-        timestamp=timestamp,
-        gaze_data=gaze_data
-    )
-    db.session.add(new_entry)
-    db.session.commit()
+#     # Create a new WebGazeData entry and save it to the database
+#     new_entry = WebGazeData(
+#         username=current_user.username,
+#         timestamp=timestamp,
+#         gaze_data=gaze_data
+#     )
+#     db.session.add(new_entry)
+#     db.session.commit()
 
-    return jsonify({"status": "success", 
-                    "message": "Gaze data saved successfully."})
+#     return jsonify({"status": "success", 
+#                     "message": "Gaze data saved successfully."})
 
-@app.route('/get_latest_gaze_data', methods=['GET'])
-def get_latest_gaze_data():
-    if not current_user.is_authenticated:
-        return jsonify({"error": "User not authenticated"}), 401
+# @app.route('/get_latest_gaze_data', methods=['GET'])
+# def get_latest_gaze_data():
+#     if not current_user.is_authenticated:
+#         return jsonify({"error": "User not authenticated"}), 401
 
-    # Query the latest gaze data for the current user
-    latest_data = (
-        WebGazeData.query
-        .filter_by(username=current_user.username)
-        .order_by(WebGazeData.timestamp.desc())
-        .first()
-    )
+#     # Query the latest gaze data for the current user
+#     latest_data = (
+#         WebGazeData.query
+#         .filter_by(username=current_user.username)
+#         .order_by(WebGazeData.timestamp.desc())
+#         .first()
+#     )
 
-    if latest_data:
-        return jsonify({
-            "status": "success",
-            "gaze_data": latest_data.gaze_data  # Assuming `gaze_data` is a JSON field
-        })
-    else:
-        return jsonify({"status": "success", "gaze_data": None})  # No previous data found
+#     if latest_data:
+#         return jsonify({
+#             "status": "success",
+#             "gaze_data": latest_data.gaze_data  # Assuming `gaze_data` is a JSON field
+#         })
+#     else:
+#         return jsonify({"status": "success", "gaze_data": None})  # No previous data found
 
 @app.route("/_back", methods=["POST", "GET"])
 def back():
@@ -1777,3 +1782,50 @@ def csv_folder():
 def help():
     print("help")
     return render_template("help.html")
+
+
+
+
+# --- TOBII GAZE STREAMING + CALIBRATION ---
+
+# Get the Tobii Eye Tracker device
+eye_tracker = tr.find_all_eyetrackers()[0]
+
+# Real-time streaming logic
+def stream_gaze_data():
+    def gaze_callback(gaze_data):
+        if gaze_data.get("left_gaze_point_on_display_area"):
+            x, y = gaze_data["left_gaze_point_on_display_area"]
+            if 0 <= x <= 1 and 0 <= y <= 1:
+                socketio.emit("gaze_data", {"x": x, "y": y})
+    
+    eye_tracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, gaze_callback, as_dictionary=True)
+
+@socketio.on("start_gaze")
+def start_gaze():
+    threading.Thread(target=stream_gaze_data).start()
+    emit("gaze_status", {"status": "started"})
+
+@app.route("/start_calibration", methods=["POST"])
+def start_calibration():
+    try:
+        calibration = tr.ScreenBasedCalibration(eye_tracker)
+        calibration.enter_calibration_mode()
+
+        points = [
+            (0.1, 0.1), (0.5, 0.1), (0.9, 0.1),
+            (0.1, 0.5), (0.5, 0.5), (0.9, 0.5),
+            (0.1, 0.9), (0.5, 0.9), (0.9, 0.9),
+        ]
+
+        for point in points:
+            calibration.collect_data(point)
+            time.sleep(0.3)
+
+        result = calibration.compute_and_apply()
+        calibration.leave_calibration_mode()
+
+        return jsonify({"status": "success", "message": f"Calibration complete. Quality: {result.status}"})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})

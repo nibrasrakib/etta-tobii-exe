@@ -3,109 +3,24 @@
 
 <head>
   <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
-  <TITLE>WebGazer Calibration</TITLE>
-  <link rel="stylesheet" type="text/css" href="./../static/calibration/style.css">
-  <link rel="stylesheet" href="./../static/calibration/bootstrap.min.css">
-  <script src="./../static/webgazer.js"></script>
+  <TITLE>Calibration</TITLE>
+  <!-- <link rel="stylesheet" type="text/css" href="./../static/calibration/style.css"> -->
+  <!-- <link rel="stylesheet" href="./../static/calibration/bootstrap.min.css"> -->
+  <!-- <script src="./../static/webgazer.js"></script> -->
   <!-- SweetAlert2 Library -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 
-<body LANG="en-US" LINK="#0000ff" DIR="LTR">
-  <canvas id="plotting_canvas" width="500" height="500" style="cursor:crosshair;"></canvas>
-
-  <script src="./../static/calibration/main.js"></script>
-  <script src="./../static/calibration/calibration.js"></script>
-  <script src="./../static/calibration/precision_calculation.js"></script>
-  <script src="./../static/calibration/precision_store_points.js"></script>
-
-  <nav id="webgazerNavbar" class="navbar navbar-expand-lg navbar-light fixed-top">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <!-- The hamburger menu button -->
-        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#myNavbar">
-          <span class="navbar-toggler-icon">Menu</span>
-        </button>
-      </div>
-      <div class="collapse navbar-collapse" id="myNavbar">
-        <ul class="nav navbar-nav">
-          <li id="Accuracy"><a>Not yet Calibrated</a></li>
-          <li><a onclick="Restart()" href="#">Recalibrate</a></li>
-          <li><a onclick="webgazer.applyKalmanFilter(!webgazer.params.applyKalmanFilter)" href="#">Toggle Kalman Filter</a></li>
-          <li><a onclick="completeCalibration()" href="#" class="btn btn-success" style="color: white;">Complete Calibration</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <li><a class="helpBtn" onclick="helpModalShow()" href="#"><span class="glyphicon glyphicon-cog"></span> Help</a></li>
-        </ul>
-      </div>      
-    </div>
-  </nav>
-
-  <!-- Calibration points -->
-  <div class="calibrationDiv">
-    <input type="button" class="Calibration" id="Pt1"></input>
-    <input type="button" class="Calibration" id="Pt2"></input>
-    <input type="button" class="Calibration" id="Pt3"></input>
-    <input type="button" class="Calibration" id="Pt4"></input>
-    <input type="button" class="Calibration" id="Pt5"></input>
-    <input type="button" class="Calibration" id="Pt6"></input>
-    <input type="button" class="Calibration" id="Pt7"></input>
-    <input type="button" class="Calibration" id="Pt8"></input>
-    <input type="button" class="Calibration" id="Pt9"></input>
-  </div>
-
-  <!-- Modal -->
-  <div id="helpModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
-          <img src="../static/calibration/calibration.png" width="100%" height="100%"
-            alt="webgazer demo instructions"></img>
-        </div>
-        <div class="modal-footer">
-          <button id="closeBtn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close & load saved model
-          </button>
-          <button type="button" id="start_calibration" class="btn btn-primary" data-bs-dismiss="modal"
-            onclick="Restart()">Calibrate</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- JavaScript to handle calibration and redirection -->
+<body>
   <script>
-    // Automatically start calibration when the page is loaded
-    // window.onload = function () {
-    //   console.log("Starting calibration process");
-    //   // Restart();
-    // };
-    // Retrieve sessionData from the server-side Flask session
-    const sessionData = {{ sessionData| tojson | safe }};
-    console.log("Session Data Loaded:", sessionData);
-
-    // Complete Calibration
-    function completeCalibration() {
-      console.log("Calibration complete. Redirecting to results...");
-
-      // Redirect to /results (sessionData remains in the Flask session)
-      const query = "{{ query }}";
-      const num_cls = "{{ num_cls }}";
-
-      const redirectUrl = `/results?query=${query}&num_cls=${num_cls}`;
-      window.location.href = redirectUrl;
-    }
+    const query = "{{ query }}";
+    const num_cls = "{{ num_cls }}";
+    const redirectUrl = `/results?query=${query}&num_cls=${num_cls}`;
+    window.location.href = redirectUrl;
   </script>
-  <!--  
-   Calibration Complete Button 
-  <div class="text-center">
-    <button id="calibration_complete_btn" onclick="completeCalibration()" class="btn btn-success">
-      Complete Calibration
-    </button>
-  </div>-->
-
-  <script src="./../static/calibration/resize_canvas.js"></script>
-  <script src="./../static/calibration/bootstrap.bundle.min.js"></script>
 </body>
+</html>
+
 
 </html>

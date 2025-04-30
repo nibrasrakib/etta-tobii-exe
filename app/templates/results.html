@@ -37,6 +37,50 @@
 	}
 </style>
 
+<style>
+	#tobii-cursor {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		background-color: red;
+		border-radius: 50%;
+		pointer-events: none;
+		z-index: 9999;
+		box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+	}
+
+</style>
+
+<style>
+	#dwell-ring {
+	  position: absolute;
+	  width: 40px;
+	  height: 40px;
+	  border-radius: 50%;
+	  border: 3px solid rgba(0, 150, 255, 0.6);
+	  box-shadow: 0 0 6px rgba(0, 150, 255, 0.3);
+	  pointer-events: none;
+	  z-index: 9998;
+	  display: none;
+	}
+  
+	#dwell-ring.fill {
+	  animation: dwellFill 2s linear forwards;
+	}
+  
+	@keyframes dwellFill {
+	  0% {
+		transform: scale(1);
+		border-color: rgba(0, 150, 255, 0.6);
+	  }
+	  100% {
+		transform: scale(1.6);
+		border-color: rgba(0, 255, 0, 1);
+	  }
+	}
+  </style>
+  
+
 <!-- Debugging Output -->
 <!-- <p><strong>Earliest Date:</strong> {{ sessionData.ear_date }} | <strong>Latest Date:</strong> {{ sessionData.lat_date }}</p> -->
 
@@ -47,385 +91,48 @@
 	}
 </style>
 <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script> -->
-<script src="{{ url_for('static', filename='webgazer.js') }}" type="text/javascript"></script>
-<!-- Setup the webgazer cursor setGazeListener and begin calibration -->
-<!-- <script>
-	// // Ensure that WebGazer is available
 
-	// Function to load the latest gaze data from the backend and set it in localforage
-	async function loadLatestGazeData() {
-		try {
-			const response = await fetch('/get_latest_gaze_data');
-			const data = await response.json();
-
-			if (data.status === "success") {
-				const gazeData = data.gaze_data;
-				// Print the number of data points retrieved
-				console.log("Number of gaze data points retrieved:", gazeData.length);
-				if (gazeData) {
-					// Set localforage with the retrieved data if it exists
-					// localforage.setItem('webgazerGlobalData', gazeData);
-					console.log("Loading:", gazeData);
-					webgazer.setStoredPoints(gazeData);
-					console.log("Loaded latest gaze data into localforage:", gazeData);
-				} else {
-					// No previous data, so localforage will be empty
-					console.log("No previous gaze data found. Starting from scratch.");
-				}
-			} else {
-				console.error("Error retrieving gaze data:", data.error);
-			}
-			return data;
-		} catch (error) {
-			console.error("Error fetching latest gaze data:", error);
-			return null;
-		}
-	}
-	// Function to initialize WebGazer
-	async function startWebGazer() {
-		// Ensure localforage is populated with gaze data before WebGazer starts
-		const latest_data = await loadLatestGazeData();
-		
-		console.log("latest_datalatest_datalatest_datalatest_datalatest_data",latest_data)
-		// Check if WebGazer is available and initialize it
-		if (webgazer) {
-			console.log("WebGazer.js loaded successfully.");
-
-			let lastElement = null; // Store the last element hovered over
-			webgazer.setGazeListener(function (data, elapsedTime) {
-				if (data == null) {
-					return;
-				}
-				var xprediction = data.x; // X coordinate of gaze
-				var yprediction = data.y; // Y coordinate of gaze
-				//   console.log("Gaze prediction:", xprediction, yprediction);
-
-				const element = document.elementFromPoint(xprediction, yprediction);
-
-				if (element && element !=lastElement){
-					// console.log("Element hovered over:", element);
-					gazeStart = performance.now();
-					if (lastElement) {
-						lastElement.style.border = "none";
-					}
-					element.style.border = "2px solid red";
-					lastElement = element;
-					console.log("Element hovered over:", element);
-				}
-			}).begin();  // Start WebGazer
-
-			
-			webgazer.setTracker('clmtrackr');
-			webgazer.addTracker('clmtrackr');
-			webgazer.params.showFaceFeedbackBox = true;
-			webgazer.params.showFaceOverlay = true;
-			webgazer.params.faceMode = 'single';
-			webgazer.setRegression("threadedRidge");
-
-			// Enable kalman filter for better eye tracking
-			webgazer.applyKalmanFilter(true);  // Enable by default
-			// Set window.saveDataAcrossSessions to false
-			window.saveDataAcrossSessions = true;
-
-			// Log kalman filter status
-			if (webgazer.params.kalmanFilter) {
-				console.log("Kalman filter is enabled");
-			}
-			console.log("WebGazer initialized and tracking started.");
-		} else {
-			console.error("Failed to load WebGazer.js.");
-		}
-	}
-	
-	
-	// Call startWebGazer on page load or after the user logs in
-	// document.addEventListener("DOMContentLoaded", startWebGazer);
-	$(function(){
-		startWebGazer()
-	})
-</script> -->
 
 <script>
     // Function to load the latest gaze data from the backend and set it in WebGazer
-	async function loadLatestGazeData() {
-		try {
-			const response = await fetch('/get_latest_gaze_data');
-			const data = await response.json();
+	// async function loadLatestGazeData() {
+	// 	try {
+	// 		const response = await fetch('/get_latest_gaze_data');
+	// 		const data = await response.json();
 
-			if (data.status === "success") {
-				const gazeData = data.gaze_data || [];
-				console.log("Number of gaze data points retrieved:", gazeData.length);
+	// 		if (data.status === "success") {
+	// 			const gazeData = data.gaze_data || [];
+	// 			console.log("Number of gaze data points retrieved:", gazeData.length);
 
-				if (gazeData.length > 0) {
-					// Set WebGazer's stored points if data exists
-					try {
-						webgazer.setStoredPoints(gazeData);
-						console.log("Loaded latest gaze data:", gazeData);
-					} catch (error) {
-						console.error("Error setting WebGazer stored points:", error);
-					}
-				} else {
-					console.log("No previous gaze data found. Starting from scratch.");
-				}
-			} else {
-				console.error("Error retrieving gaze data:", data.error);
-			}
-		} catch (error) {
-			console.error("Error fetching latest gaze data:", error);
-		}
-	}
-
-	// // Function to initialize WebGazer
-	// async function startWebGazer() {
-	// 	// Load the latest gaze data before initializing WebGazer
-	// 	await loadLatestGazeData();
-
-	// 	if (webgazer) {
-	// 		console.log("WebGazer.js loaded successfully.");
-
-	// 		let lastElement = null; // Store the last hovered element
-	// 		let hoverTimeout = null; // Timeout to track hover duration
-	// 		const hoverTimeThreshold = 1000; // Time in milliseconds to confirm hover
-
-	// 		// webgazer.setGazeListener((data, elapsedTime) => {
-	// 		// 		if (data == null) return;
-
-	// 		// 		const x = data.x;
-	// 		// 		const y = data.y;
-
-	// 		// 		// Get the DOM element under the gaze point
-	// 		// 		const element = document.elementFromPoint(x, y);
-
-	// 		// 		// Check if it's a `<circle>` with class "cover"
-	// 		// 		if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover")) {
-	// 		// 			if (element !== lastElement) {
-	// 		// 				// New element hovered, reset timer
-	// 		// 				if (hoverTimeout) {
-	// 		// 					clearTimeout(hoverTimeout);
-	// 		// 				}
-
-	// 		// 				// Set timeout to detect sustained hover
-	// 		// 				hoverTimeout = setTimeout(() => {
-	// 		// 					console.log("Hovered over a circle with class 'cover' for", hoverTimeThreshold, "ms:", element);
-	// 		// 					console.log(
-	// 		// 						"Attributes: r =", element.getAttribute("r"),
-	// 		// 						", cx =", element.getAttribute("cx"),
-	// 		// 						", cy =", element.getAttribute("cy")
-	// 		// 					);
-
-	// 		// 					// Simulate a click event on the element
-	// 		// 					element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-	// 		// 					console.log("Simulated click event on:", element);
-	// 		// 				}, hoverTimeThreshold);
-
-	// 		// 				// Update lastElement
-	// 		// 				lastElement = element;
-	// 		// 			}
-	// 		// 		} else {
-	// 		// 			// Not hovering over a valid element; reset hover tracking
-	// 		// 			if (hoverTimeout) {
-	// 		// 				clearTimeout(hoverTimeout);
-	// 		// 			}
-	// 		// 			lastElement = null;
-	// 		// 		}
-	// 		// }).begin();
-	// 		console.log("WebGazer object:", webgazer);
-	// 		webgazer.setGazeListener((data, elapsedTime) => {
-	// 			if (data == null) return;
-
-	// 			const x = data.x;
-	// 			const y = data.y;
-
-	// 			// Get all circles with class "cover"
-	// 			const circles = document.querySelectorAll("circle.cover");
-
-	// 			// Iterate through circles to find one within the 10% threshold
-	// 			for (const circle of circles) {
-	// 				const cx = parseFloat(circle.getAttribute("cx"));
-	// 				const cy = parseFloat(circle.getAttribute("cy"));
-	// 				const r = parseFloat(circle.getAttribute("r"));
-
-	// 				// Calculate the Euclidean distance from gaze point to circle center
-	// 				const distance = Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2));
-
-	// 				// Check if the distance is within the radius plus 10%
-	// 				if (distance <= r * 1.1) {
-	// 					if (circle !== lastElement) {
-	// 						// New circle hovered, reset timer
-	// 						if (hoverTimeout) {
-	// 							clearTimeout(hoverTimeout);
-	// 						}
-
-	// 						// Set timeout to detect sustained hover
-	// 						hoverTimeout = setTimeout(() => {
-	// 							console.log("Hovered over a circle with class 'cover' for", hoverTimeThreshold, "ms:", circle);
-	// 							console.log(
-	// 								"Attributes: r =", r,
-	// 								", cx =", cx,
-	// 								", cy =", cy
-	// 							);
-
-	// 							// Simulate a click event on the circle
-	// 							circle.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-	// 							console.log("Simulated click event on:", circle);
-	// 						}, hoverTimeThreshold);
-
-	// 						// Update lastElement
-	// 						lastElement = circle;
-	// 					}
-	// 					return; // Stop checking further circles if one is found
+	// 			if (gazeData.length > 0) {
+	// 				// Set WebGazer's stored points if data exists
+	// 				try {
+	// 					webgazer.setStoredPoints(gazeData);
+	// 					console.log("Loaded latest gaze data:", gazeData);
+	// 				} catch (error) {
+	// 					console.error("Error setting WebGazer stored points:", error);
 	// 				}
+	// 			} else {
+	// 				console.log("No previous gaze data found. Starting from scratch.");
 	// 			}
-
-	// 			// Not hovering over any valid circle; reset hover tracking
-	// 			if (hoverTimeout) {
-	// 				clearTimeout(hoverTimeout);
-	// 			}
-	// 			lastElement = null;
-	// 		}).begin();
-
-
-	// 		// Configure WebGazer
-	// 		webgazer.setTracker("TFFacemesh");
-	// 		webgazer.addTracker("TFFacemesh");
-	// 		webgazer.params.showFaceFeedbackBox = true;
-	// 		webgazer.params.showFaceOverlay = true;
-	// 		webgazer.params.faceMode = "single";
-	// 		// webgazer.setRegression("threadedRidge");
-	// 		webgazer.params.useKalmanFilter = true; // Force Kalman filter
-	// 		webgazer.params.regressionType = "threadedRidge"; // Force regression type
-	// 		if (typeof webgazer.setRegression === "function") {
-	// 			webgazer.setRegression("threadedRidge");
-	// 			console.log("Regression model set to threadedRidge.");
 	// 		} else {
-	// 			console.warn("setRegression method is not available in this version.");
+	// 			console.error("Error retrieving gaze data:", data.error);
 	// 		}
-
-	// 		if (typeof webgazer.applyKalmanFilter === "function") {
-	// 			webgazer.applyKalmanFilter(true);
-	// 			console.log("Kalman filter enabled.");
-	// 		} else {
-	// 			console.warn("applyKalmanFilter method is not available in this version.");
-	// 		}
-
-	// 		console.log("Updated WebGazer params:", webgazer.params);
-
-	// 		// webgazer.applyKalmanFilter(true); // Enable Kalman filter for smoothing
-	// 		window.saveDataAcrossSessions = true;
-
-	// 		console.log("WebGazer initialized and tracking started.");
-	// 	} else {
-	// 		console.error("Failed to load WebGazer.js.");
+	// 	} catch (error) {
+	// 		console.error("Error fetching latest gaze data:", error);
 	// 	}
 	// }
 
-	// // Start WebGazer after the DOM is ready
-	// $(function () {
-	// 	startWebGazer();
-	// });
 
-	// Function to initialize WebGazer
+// Function to initialize WebGazer
+// async function startWebGazer() {
+//     await loadLatestGazeData();
+// }
 
-	
-async function startWebGazer() {
-    await loadLatestGazeData();
-
-    if (webgazer) {
-        console.log("WebGazer.js loaded successfully.");
-        console.log("Initial WebGazer object:", webgazer);
-
-        // Configure WebGazer
-        webgazer.params.showFaceFeedbackBox = true;
-        webgazer.params.showFaceOverlay = true;
-        webgazer.params.showGazeDot = true;
-        webgazer.params.faceMode = "single";
-        webgazer.params.useKalmanFilter = true;
-        webgazer.params.regressionType = "threadedRidge";
-
-        console.log("WebGazer params after setup:", webgazer.params);
-
-        // Ensure Gaze Dot Exists
-        // if (!document.getElementById("webgazerGazeDot")) {
-        //     const gazeDot = document.createElement("div");
-        //     gazeDot.id = "webgazerGazeDot";
-        //     gazeDot.style.position = "absolute";
-        //     gazeDot.style.backgroundColor = "red";
-        //     gazeDot.style.borderRadius = "50%";
-        //     gazeDot.style.width = "10px";
-        //     gazeDot.style.height = "10px";
-        //     gazeDot.style.zIndex = "1000";
-        //     gazeDot.style.pointerEvents = "none";
-        //     document.body.appendChild(gazeDot);
-        //     console.log("Gaze dot manually created.");
-        // }
-
-        // Gaze Listener Variables
-        let lastElement = null; // Store the last hovered element
-        let hoverTimeout = null; // Timeout to track hover duration
-        const hoverTimeThreshold = 250; // Time in milliseconds to confirm hover
-
-        // Start WebGazer
-        webgazer.setGazeListener((data, elapsedTime) => {
-            if (data == null) return;
-
-            const x = data.x;
-            const y = data.y;
-
-            // // Update Gaze Dot Position
-            // const gazeDot = document.getElementById("webgazerGazeDot");
-            // if (gazeDot) {
-            //     gazeDot.style.left = `${x}px`;
-            //     gazeDot.style.top = `${y}px`;
-            // }
-
-            // Get the DOM element under the gaze point
-            const element = document.elementFromPoint(x, y);
-
-            // Check if it's a `<circle>` with class "cover"
-            if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover")) {
-                if (element !== lastElement) {
-                    // New circle hovered, reset timer
-                    if (hoverTimeout) {
-                        clearTimeout(hoverTimeout);
-                    }
-
-                    // Set timeout to detect sustained hover
-                    hoverTimeout = setTimeout(() => {
-                        console.log("Hovered over a circle with class 'cover' for", hoverTimeThreshold, "ms:", element);
-                        console.log(
-                            "Attributes: r =", element.getAttribute("r"),
-                            ", cx =", element.getAttribute("cx"),
-                            ", cy =", element.getAttribute("cy")
-                        );
-
-                        // Simulate a left-click event on the circle
-                        element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }));
-                        console.log("Simulated left-click event on:", element);
-                    }, hoverTimeThreshold);
-
-                    // Update lastElement
-                    lastElement = element;
-                }
-            } else {
-                // Not hovering over a valid element; reset hover tracking
-                if (hoverTimeout) {
-                    clearTimeout(hoverTimeout);
-                }
-                lastElement = null;
-            }
-        });
-
-        webgazer.begin();
-        console.log("WebGazer initialized and tracking started.");
-    } else {
-        console.error("Failed to load WebGazer.js.");
-    }
-}
-
-// Start WebGazer after the DOM is ready
-$(function () {
-    startWebGazer();
-});
+// // Start WebGazer after the DOM is ready
+// $(function () {
+//     startWebGazer();
+// });
 
 </script>
 
@@ -499,83 +206,48 @@ function tutorial(){
 }
 
 
-// Access the localForage IndexedDB instance and extract data
-async function downloadWebGazerData() {
-    const dbName = 'localforage'; // Name of the IndexedDB
-    const storeName = 'keyvaluepairs'; // Store containing WebGazer data
+// // Access the localForage IndexedDB instance and extract data
+// async function downloadWebGazerData() {
+//     const dbName = 'localforage'; // Name of the IndexedDB
+//     const storeName = 'keyvaluepairs'; // Store containing WebGazer data
 
-    // Open the IndexedDB
-    const request = indexedDB.open(dbName);
+//     // Open the IndexedDB
+//     const request = indexedDB.open(dbName);
 
-    request.onsuccess = function(event) {
-        const db = event.target.result;
-        const transaction = db.transaction(storeName, 'readonly');
-        const store = transaction.objectStore(storeName);
+//     request.onsuccess = function(event) {
+//         const db = event.target.result;
+//         const transaction = db.transaction(storeName, 'readonly');
+//         const store = transaction.objectStore(storeName);
 
-        // Retrieve all data from the store
-        const getRequest = store.getAll();
+//         // Retrieve all data from the store
+//         const getRequest = store.getAll();
 
-        getRequest.onsuccess = function(event) {
-            const data = event.target.result;
+//         getRequest.onsuccess = function(event) {
+//             const data = event.target.result;
 
-            // Convert the data to JSON and trigger download
-            const jsonData = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+//             // Convert the data to JSON and trigger download
+//             const jsonData = JSON.stringify(data, null, 2);
+//             const blob = new Blob([jsonData], { type: 'application/json' });
+//             const url = URL.createObjectURL(blob);
 
-            // Create a temporary link to download the file
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'webgazer_data.json';
-            a.click();
-            URL.revokeObjectURL(url); // Clean up URL object
-        };
+//             // Create a temporary link to download the file
+//             const a = document.createElement('a');
+//             a.href = url;
+//             a.download = 'webgazer_data.json';
+//             a.click();
+//             URL.revokeObjectURL(url); // Clean up URL object
+//         };
 
-        getRequest.onerror = function(event) {
-            console.error('Error retrieving data from IndexedDB:', event.target.error);
-        };
-    };
+//         getRequest.onerror = function(event) {
+//             console.error('Error retrieving data from IndexedDB:', event.target.error);
+//         };
+//     };
 
-    request.onerror = function(event) {
-        console.error('Error opening IndexedDB:', event.target.error);
-    };
-}
-
-// function waitForBubbleElement(bubbleId, callback) {
-//     // Set up a MutationObserver to detect when the element is added to the DOM
-//     const observer = new MutationObserver((mutations) => {
-//         mutations.forEach((mutation) => {
-//             mutation.addedNodes.forEach((node) => {
-//                 if (node.id === bubbleId) {
-//                     console.log(`Detected bubble with id ${bubbleId} using MutationObserver.`);
-//                     observer.disconnect(); // Stop observing once the element is found
-//                     callback(node); // Call the callback with the element
-//                 }
-//             });
-//         });
-//     });
-
-//     // Start observing the document body or a specific container
-//     observer.observe(document.body, { childList: true, subtree: true });
-
-//     // Fallback: Use setTimeout to poll for the element every 500ms in case MutationObserver doesn't catch it
-//     const pollInterval = setInterval(() => {
-//         const bubble = document.getElementById(bubbleId);
-//         if (bubble) {
-//             console.log(`Detected bubble with id ${bubbleId} using polling.`);
-//             clearInterval(pollInterval); // Stop polling once the element is found
-//             observer.disconnect(); // Disconnect the MutationObserver as well
-//             callback(bubble); // Call the callback with the element
-//         }
-//     }, 500); // Adjust the polling interval as needed
+//     request.onerror = function(event) {
+//         console.error('Error opening IndexedDB:', event.target.error);
+//     };
 // }
 
-// // Call this function with the ID and callback function when you're ready to detect the element
-// waitForBubbleElement("circle_0", (bubble) => {
-//     console.log("Bubble detected:", bubble);
-//     // Now that the element is available, call the mouseover function
-//     mouseover({ id: 0 });
-// });
 //show uploaded articles in a new window
 function show_uploaded_articles(article,link_id){
 	//var myWindow = window.close()
@@ -1196,29 +868,6 @@ function VoiceEdges(cluster) {
 			}
 			d3.selectAll('line').lower();
 			d3.selectAll('#background_rect').lower();
-			//var svg = document.querySelector("svg");
-			//var circles = document.querySelectorAll("circle");
-			//var text = document.querySelectorAll("text");
-			//var menu = d3.select('.context-menu');
-			//var rect = menu['_groups'][0][0].getBoundingClientRect();
-			//var document_container = '';
-			//if(document.getElementById('contextMenu_documents') !== null){
-			//	 document_container = document.getElementById('contextMenu_documents');
-			//}
-			//d3.select('.context-menu').remove();
-			//d3.select('foreignObject').remove();
-			//// //add circles over edges
-			//for(var i = 0; i < circles.length; i++){
-			//	svg.appendChild(circles[i]);
-			//}
-			//var text = document.querySelectorAll("text");
-			//for(var i = 0; i < text.length; i++){
-			//	svg.appendChild(text[i]);
-			//}
-			//svg.appendChild(menu['_groups'][0][0]);
-			//if(document_container !== ''){
-			//	svg.appendChild(document_container);
-			//}
 
 
 	}
@@ -1255,41 +904,7 @@ function VoiceEdges(cluster) {
 	}
 
 
-	// function mouseover(d) {
-	// 	const hoverDelay = 1000; // 5 seconds
-	// 	let hoverTimer;
-
-	// 	// Select the bubble element by ID
-	// 	const bubble = document.getElementById(`circle_${d.id}`);
-		
-	// 	if (!bubble) {
-	// 		console.error(`Bubble with id circle_${d.id} not found.`);
-	// 		return;
-	// 	}
-
-	// 	console.log(`Bubble with id circle_${d.id} successfully selected.`);
-
-	// 	// Enable pointer events on the bubble, if not already set
-	// 	bubble.style.pointerEvents = "auto";
-
-	// 	// Define hover functions
-	// 	function startHoverTimer() {
-	// 		console.log(`Mouse entered bubble ${d.id}, starting hover timer...`);
-	// 		hoverTimer = setTimeout(() => {
-	// 			console.log(`Hovering for ${hoverDelay / 1000} seconds, showing documents.`);
-	// 			showDocuments(d); // Trigger document display after 5 seconds of hover
-	// 		}, hoverDelay);
-	// 	}
-
-	// 	function clearHoverTimer() {
-	// 		console.log(`Mouse left bubble ${d.id}, clearing hover timer.`);
-	// 		clearTimeout(hoverTimer); // Clear the timer if mouse leaves early
-	// 	}
-
-	// 	// Attach event listeners to start and clear the hover timer
-	// 	bubble.addEventListener("mouseenter", startHoverTimer);
-	// 	bubble.addEventListener("mouseleave", clearHoverTimer);
-	// }
+	
 
 	function mouseover(d) {
 		// Select the bubble element by ID
@@ -2242,7 +1857,7 @@ function citationGenerator(id){
 										//console.log("menu_text", menu_text);
 										//console.log("circleId", circleId);
 										// Call the function to download the gaze data
-										downloadWebGazerData()
+										// downloadWebGazerData()
 										console.log("downloadGazeData");
 										if (!opened_edges_id.has(circleId)) {
 
@@ -2798,7 +2413,6 @@ function citationGenerator(id){
   //document.getElementById('entities_menu').style.opacity= 0
 
 	$(function() {
-		<!-- reclustering -->
 		$('a#calculate').bind('click', zoomIn);
 	});
 
@@ -3418,6 +3032,10 @@ $(document).ready(function() {
 
 </script>
 
+<div id="tobii-cursor"></div>
+<!-- <div id="dwell-ring"></div> -->
+
+
 
 
 <div style='margin-top: 60px'>
@@ -3734,61 +3352,39 @@ $(document).ready(function() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 <script>
-    // let lastCheckedLength = 0; // Variable to store the last known length of data
-
-    // async function checkNewGazeData() {
-    //     try {
-    //         // Retrieve the current data from localForage
-    //         const gazeData = await localforage.getItem('webgazerGlobalData');
-
-    //         if (gazeData && Array.isArray(gazeData)) {
-    //             // Check if new data points have been added
-    //             if (gazeData.length > lastCheckedLength) {
-    //                 // Loop through new points and log them
-    //                 for (let i = lastCheckedLength; i < gazeData.length; i++) {
-    //                     console.log("New Gaze Data Point:", gazeData[i]);
-    //                 }
-    //                 // Update lastCheckedLength to the new length of gazeData
-    //                 lastCheckedLength = gazeData.length;
-    //             }
-    //         }
-    //     } catch (error) {
-    //         console.error("Error retrieving data from localForage:", error);
-    //     }
-    // }
 
 
-	async function saveGazeDataToDB() {
-		try {
-			// Retrieve the gaze data from localForage
-			const gazeData = await localforage.getItem('webgazerGlobalData');
+	// async function saveGazeDataToDB() {
+	// 	try {
+	// 		// Retrieve the gaze data from localForage
+	// 		const gazeData = await localforage.getItem('webgazerGlobalData');
 
-			if (gazeData) {
-				// Send gaze data to the server
-				fetch('/save_gaze_data', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						gaze_data: gazeData
-					})
-				})
-				.then(response => response.json())
-				.then(data => {
-					console.log("Gaze data saved:", data);
-				})
-				.catch(error => console.error("Error:", error));
-			} else {
-				console.log("No gaze data to save.");
-			}
-		} catch (error) {
-			console.error("Error retrieving data from localForage:", error);
-		}
-	}
+	// 		if (gazeData) {
+	// 			// Send gaze data to the server
+	// 			fetch('/save_gaze_data', {
+	// 				method: 'POST',
+	// 				headers: {
+	// 					'Content-Type': 'application/json'
+	// 				},
+	// 				body: JSON.stringify({
+	// 					gaze_data: gazeData
+	// 				})
+	// 			})
+	// 			.then(response => response.json())
+	// 			.then(data => {
+	// 				console.log("Gaze data saved:", data);
+	// 			})
+	// 			.catch(error => console.error("Error:", error));
+	// 		} else {
+	// 			console.log("No gaze data to save.");
+	// 		}
+	// 	} catch (error) {
+	// 		console.error("Error retrieving data from localForage:", error);
+	// 	}
+	// }
 
-	// Call saveGazeData every 10 seconds
-	setInterval(saveGazeDataToDB, 30000);
+	// // Call saveGazeData every 10 seconds
+	// setInterval(saveGazeDataToDB, 30000);
 
 
     // Run the checkNewGazeData function every 2 seconds
@@ -3803,6 +3399,114 @@ $(document).ready(function() {
 
 </script>
 
+<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+<script>
+    const socket = io("http://localhost:5000"); // Update if hosted elsewhere
+    socket.emit("start_gaze");
 
+    const cursor = document.getElementById("tobii-cursor");
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
+    socket.on("gaze_data", data => {
+        if (data.x < 0 || data.x > 1 || data.y < 0 || data.y > 1) return;
+        targetX = data.x * window.innerWidth;
+        targetY = data.y * window.innerHeight;
+    });
+
+    function moveCursorSmoothly() {
+        const smoothing = 0.15;
+        currentX += (targetX - currentX) * smoothing;
+        currentY += (targetY - currentY) * smoothing;
+        cursor.style.left = `${currentX}px`;
+        cursor.style.top = `${currentY}px`;
+        requestAnimationFrame(moveCursorSmoothly);
+    }
+
+    moveCursorSmoothly();
+
+	// Adding click simulation
+	let lastElement = null;
+	let hoverTimeout = null;
+	const hoverTimeThreshold = 1000; // milliseconds
+
+	function checkGazeHoverTrigger() {
+		const element = document.elementFromPoint(currentX, currentY);
+
+		if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover")) {
+			if (element !== lastElement) {
+				// New element: reset hover timer
+				if (hoverTimeout) clearTimeout(hoverTimeout);
+
+				hoverTimeout = setTimeout(() => {
+					console.log("Hovered over:", element);
+					element.dispatchEvent(new MouseEvent("click", {
+						bubbles: true,
+						cancelable: true,
+						button: 0
+					}));
+					console.log("Simulated click on:", element);
+				}, hoverTimeThreshold);
+
+				lastElement = element;
+			}
+		} else {
+			// Gaze moved off a valid element
+			if (hoverTimeout) clearTimeout(hoverTimeout);
+			lastElement = null;
+		}
+
+		requestAnimationFrame(checkGazeHoverTrigger);
+	}
+
+	checkGazeHoverTrigger();
+
+</script>
+
+<!-- <script>
+    const dwellRing = document.getElementById("dwell-ring");
+    let lastBubble = null;
+    let hoverStartTime = null;
+    const DWELL_TIME = 2000;
+
+    socket.on("gaze_data", data => {
+        const x = data.x * window.innerWidth;
+        const y = data.y * window.innerHeight;
+
+        targetX = x;
+        targetY = y;
+
+        const el = document.elementFromPoint(x, y);
+        const isBubble = el && el.classList.contains("bubble");
+
+        if (isBubble && el !== lastBubble) {
+            lastBubble = el;
+            hoverStartTime = Date.now();
+
+            // Show dwell ring
+            dwellRing.style.left = `${x - 20}px`;
+            dwellRing.style.top = `${y - 20}px`;
+            dwellRing.classList.remove("fill");
+            void dwellRing.offsetWidth;
+            dwellRing.classList.add("fill");
+            dwellRing.style.display = "block";
+        } else if (isBubble && el === lastBubble) {
+            if (hoverStartTime && Date.now() - hoverStartTime >= DWELL_TIME) {
+                console.log("Dwell-clicked on:", el);
+                el.dispatchEvent(new Event("mouseover")); // optional: trigger any hover effect
+                el.click(); // trigger real click
+                dwellRing.style.display = "none";
+                hoverStartTime = null;
+            }
+        } else {
+            lastBubble = null;
+            hoverStartTime = null;
+            dwellRing.style.display = "none";
+            dwellRing.classList.remove("fill");
+        }
+    });
+</script>
+
+ -->
 
 {% endblock %}
