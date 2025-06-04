@@ -1,7 +1,16 @@
 from openai import OpenAI
 
-def generate_summary(user_content, api_key='sk-proj-e6buTs2eOWsTk2UYfyLtT3BlbkFJNhBqzxiWlkitL1CqVIzN'):
-    
+# Load your OpenAI API key from an environment variable or directly
+# For security reasons, it's better to use environment variables in production
+import os
+def load_api_key():
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("API key not found. Set the OPENAI_API_KEY environment variable.")
+    return api_key
+
+def generate_summary(user_content):
+    api_key = load_api_key()
     client = OpenAI(api_key=api_key)
 
     completion = client.chat.completions.create(

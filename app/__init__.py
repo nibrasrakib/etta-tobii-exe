@@ -10,7 +10,7 @@ import re
 
 # TOBII 
 from flask_socketio import SocketIO
-
+from flask_cors import CORS
 
 # setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -19,6 +19,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # TOBII
+CORS(app)  # Enable CORS
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # database

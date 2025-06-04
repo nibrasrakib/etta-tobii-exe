@@ -7,6 +7,50 @@
 <!-- responsive web design tag to adjust for all devices -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+	#tobii-cursor {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		background-color: red;
+		border-radius: 50%;
+		pointer-events: none;
+		z-index: 9999;
+		box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+	}
+
+</style>
+
+<style>
+	#dwell-ring {
+	  position: absolute;
+	  width: 40px;
+	  height: 40px;
+	  border-radius: 50%;
+	  border: 3px solid rgba(0, 150, 255, 0.6);
+	  box-shadow: 0 0 6px rgba(0, 150, 255, 0.3);
+	  pointer-events: none;
+	  z-index: 9998;
+	  display: none;
+	}
+  
+	#dwell-ring.fill {
+	  animation: dwellFill 2s linear forwards;
+	}
+  
+	@keyframes dwellFill {
+	  0% {
+		transform: scale(1);
+		border-color: rgba(0, 150, 255, 0.6);
+	  }
+	  100% {
+		transform: scale(1.6);
+		border-color: rgba(0, 255, 0, 1);
+	  }
+	}
+  </style>
+  
+
 
 <div style=background-color:white class=container_search>
 	<form name="Go" action="" method="POST" enctype="multipart/form-data" id="usrform">
@@ -93,6 +137,84 @@
 		</dl>
 	</form>
 </div>
+<div id="tobii-cursor"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+<script>
+    const socket = io("http://localhost:5000"); // Update if hosted elsewhere
+    socket.emit("start_gaze");
+
+    const cursor = document.getElementById("tobii-cursor");
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
+    socket.on("gaze_data", data => {
+        if (data.x < 0 || data.x > 1 || data.y < 0 || data.y > 1) return;
+        targetX = data.x * window.innerWidth;
+        targetY = data.y * window.innerHeight;
+    });
+
+    function moveCursorSmoothly() {
+        const smoothing = 0.15;
+        currentX += (targetX - currentX) * smoothing;
+        currentY += (targetY - currentY) * smoothing;
+        cursor.style.left = `${currentX}px`;
+        cursor.style.top = `${currentY}px`;
+        requestAnimationFrame(moveCursorSmoothly);
+    }
+
+    moveCursorSmoothly();
+
+	// Adding click simulation
+	let lastElement = null;
+	let hoverTimeout = null;
+	const hoverTimeThreshold = 1000; // milliseconds
+
+	function checkGazeHoverTrigger() {
+		const element = document.elementFromPoint(currentX, currentY);
+
+		if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover") || (element && element.id === "zoom-in-button") || (element && element.id === "zoom-out-button") || (element && element.id === "Explore") || (element && element.id === "num_cls")) {
+			if (element !== lastElement) {
+				// New element: reset hover timer
+				if (hoverTimeout) clearTimeout(hoverTimeout);
+
+				hoverTimeout = setTimeout(() => {
+					console.log("Hovered over:", element);
+					// element.dispatchEvent(new MouseEvent("click", {
+					// 	bubbles: true,
+					// 	cancelable: true,
+					// 	button: 0
+					// }));
+					if (element.tagName.toLowerCase() === "select") {
+						// For dropdowns, open/focus it
+						element.focus();
+						element.size = element.options.length; // optional: expand dropdown on gaze
+					} else {
+						element.dispatchEvent(new MouseEvent("click", {
+							bubbles: true,
+							cancelable: true,
+							button: 0
+						}));
+						console.log("Simulated click on:", element);
+					}
+					// console.log("Simulated click on:", element);
+				}, hoverTimeThreshold);
+
+				lastElement = element;
+			}
+		} else {
+			// Gaze moved off a valid element
+			if (hoverTimeout) clearTimeout(hoverTimeout);
+			lastElement = null;
+		}
+
+		requestAnimationFrame(checkGazeHoverTrigger);
+	}
+
+	checkGazeHoverTrigger();
+
+</script>
+
 
 
 <script>

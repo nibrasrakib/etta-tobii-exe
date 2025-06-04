@@ -40,16 +40,6 @@
         3. Please upload file smaller than 25 MB.
       </p>
       </form>
-      <!-- {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      {% for message in messages %}
-      <script>
-        var message = {{ message| tojson}}
-        alert(message)
-      </script>
-      {% endfor %}
-      {% endif %}
-      {% endwith %} -->
       <script>
         const warning = {{ warning| tojson}}
         if (warning != "")

@@ -34,12 +34,11 @@ from app import socketio
 from flask_socketio import emit
 import tobii_research as tr
 import threading
-
-
 ####
 
 
 import math
+
 import os
 import time
 
@@ -57,8 +56,8 @@ from elasticsearch import Elasticsearch
 from openai import OpenAI
 from generate_summary import generate_summary
 from cluster_postgreSQL import get_date_summary
-# from app.models import WebGazeData
-from app import app, db
+
+from app import db # for database connection
 
 import logging
 # Set logging level to suppress debug/info logs
@@ -187,10 +186,6 @@ def home():
         end_date=today,
         is_authenticated=current_user.is_authenticated,
     )
-    
-# @app.route('/calibration')
-# def calibration():
-#     return render_template('calibration.html')
 
 @app.route("/calibration", methods=["GET"])
 def calibration():
@@ -202,51 +197,6 @@ def calibration():
     # Pass sessionData and other parameters to the calibration template
     return render_template("calibration.html", query=query, num_cls=num_cls, sessionData=sessionData)
 
-
-# @app.route('/save_gaze_data', methods=['POST'])
-# def save_gaze_data():
-#     if not current_user.is_authenticated:
-#         return jsonify({"error": "User not authenticated"}), 401
-
-#     data = request.json
-#     gaze_data = data.get('gaze_data')
-#     timestamp = datetime.now()
-
-#     if not gaze_data:
-#         return jsonify({"error": "No gaze data provided"}), 400
-
-#     # Create a new WebGazeData entry and save it to the database
-#     new_entry = WebGazeData(
-#         username=current_user.username,
-#         timestamp=timestamp,
-#         gaze_data=gaze_data
-#     )
-#     db.session.add(new_entry)
-#     db.session.commit()
-
-#     return jsonify({"status": "success", 
-#                     "message": "Gaze data saved successfully."})
-
-# @app.route('/get_latest_gaze_data', methods=['GET'])
-# def get_latest_gaze_data():
-#     if not current_user.is_authenticated:
-#         return jsonify({"error": "User not authenticated"}), 401
-
-#     # Query the latest gaze data for the current user
-#     latest_data = (
-#         WebGazeData.query
-#         .filter_by(username=current_user.username)
-#         .order_by(WebGazeData.timestamp.desc())
-#         .first()
-#     )
-
-#     if latest_data:
-#         return jsonify({
-#             "status": "success",
-#             "gaze_data": latest_data.gaze_data  # Assuming `gaze_data` is a JSON field
-#         })
-#     else:
-#         return jsonify({"status": "success", "gaze_data": None})  # No previous data found
 
 @app.route("/_back", methods=["POST", "GET"])
 def back():
@@ -788,8 +738,7 @@ def get_num_cls_for_digi(num_docs):
         return 5
     else:
         return 3
-
-
+    
 @app.route("/results", methods=["GET"])
 def results():
     # Retrieve sessionData from Flask session or POST request
@@ -1705,7 +1654,6 @@ def cluster():
     #     lat_date=lat_date,
     #     last_up=last_up,
     # )
-    
     session["sessionData"] = sessionData
     session["results_data"] = {
                                 "login": login, "loginType": loginType, "username": username, "query": raw_query, "decoratedQuery": q, "error": error, 
@@ -1718,9 +1666,7 @@ def cluster():
                             query=raw_query,
                             num_cls=num_cls,
     ))
-
-
-
+    
     
 
 
@@ -1783,16 +1729,14 @@ def help():
     print("help")
     return render_template("help.html")
 
-
-
-
 # --- TOBII GAZE STREAMING + CALIBRATION ---
 
-# Get the Tobii Eye Tracker device
-eye_tracker = tr.find_all_eyetrackers()[0]
+
 
 # Real-time streaming logic
 def stream_gaze_data():
+    # Get the Tobii Eye Tracker device
+    eye_tracker = tr.find_all_eyetrackers()[0]
     def gaze_callback(gaze_data):
         if gaze_data.get("left_gaze_point_on_display_area"):
             x, y = gaze_data["left_gaze_point_on_display_area"]
@@ -1809,6 +1753,8 @@ def start_gaze():
 @app.route("/start_calibration", methods=["POST"])
 def start_calibration():
     try:
+        # Get the Tobii Eye Tracker device
+        eye_tracker = tr.find_all_eyetrackers()[0]
         calibration = tr.ScreenBasedCalibration(eye_tracker)
         calibration.enter_calibration_mode()
 

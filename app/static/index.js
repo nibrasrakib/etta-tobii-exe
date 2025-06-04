@@ -252,7 +252,7 @@ function changeField (value) {
 		x.setAttribute("name", "start_date");
 		x.setAttribute("id", "start_date");
 		x.setAttribute("value", "{{start_date}}");
-		x.setAttribute("style", "opacity:0.75;background:#4c6d92");
+		x.setAttribute("style", "opacity:0.75;background:DodgerBlue");
 		document.getElementById("date_div").appendChild(x);
 
 		var dt = document.createElement("dt");
@@ -265,7 +265,7 @@ function changeField (value) {
 		x.setAttribute("name", "end_date");
 		x.setAttribute("id", "end_date");
 		x.setAttribute("value", "{{end_date}}");
-		x.setAttribute("style", "opacity:0.9;background:#4c6d92");
+		x.setAttribute("style", "opacity:0.9;background:DodgerBlue");
 		document.getElementById("date_div").appendChild(x);
 
 		document.getElementById("date_div").appendChild(dt);
@@ -288,7 +288,7 @@ function changeField (value) {
 		document.getElementById("field").innerHTML = "";
 		createOption_field("All fields");
 		// user has selected an uploaded file, reveal the delete button and enable delete file function
-		document.getElementById("delete").style.visibility = "hidden";
+		document.getElementById("delete").style.visibility = "visible";
 	}
 }
 

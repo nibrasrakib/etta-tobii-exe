@@ -45,9 +45,6 @@ class Config(object):
     DC_DB_HOST = '34.133.177.246'
     DC_DB_PORT = 5432
     DC_DB_NAME = 'rss_feed'
-    SQLALCHEMY_DATABASE_URI = f"postgresql://{DC_DB_USER}:{DC_DB_PASS}@{DC_DB_HOST}:{DC_DB_PORT}/{DC_DB_NAME}"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ECHO = False
     
     
 
