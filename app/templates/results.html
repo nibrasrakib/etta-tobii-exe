@@ -876,15 +876,39 @@ function VoiceEdges(cluster) {
 
 		if(selected_bibs.size>=zoom_in_threshold){
 			if(current_selection_trace.level > 0) {
-				var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Zoom in', 'Zoom out', 'Close Menu');
+				var menu = contextMenu().items(
+				// info_text, 
+				'Show Documents');
+				// edge_text, 
+				// 'Hide All Edges', 
+				// 'Zoom in', 
+				// 'Zoom out', 
+				// 'Close Menu');
 			} else {
-				var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Zoom in', 'Close Menu');
+				var menu = contextMenu().items(
+				// info_text, 
+				'Show Documents');
+				// edge_text, 
+				// 'Hide All Edges', 
+				// 'Zoom in', 
+				// 'Close Menu');
 			}
 		}else{
 			if(current_selection_trace.level > 0) {
-				var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Zoom out', 'Close Menu');
+				var menu = contextMenu().items(
+				// info_text, 
+				'Show Documents');
+				// edge_text, 
+				// 'Hide All Edges', 
+				// 'Zoom out', 
+				// 'Close Menu');
 			} else {
-				var menu = contextMenu().items(info_text, 'Show Documents', edge_text, 'Hide All Edges', 'Close Menu');
+				var menu = contextMenu().items(
+				// info_text, 
+				'Show Documents');
+				// edge_text, 
+				// 'Hide All Edges', 
+				// 'Close Menu');
 			}
 		}
 		//menu(d.optimized_cx - d.actual_radius * min_resize_factor, d.optimized_cx + d.actual_radius * min_resize_factor, d.optimized_cy - 0.5 * d.actual_radius * min_resize_factor, d.id);
@@ -1001,7 +1025,9 @@ function citationGenerator(id){
 		// alert('Documents shown for ' + d.id);
 		var dataset_opt = urlParams.get("dataset_opt");
 		var bibs_list = "";
-		var bibs_length = d.members.length;
+		// var bibs_length = d.members.length;
+		var bibs_length = Math.min(4, d.members.length);
+		var bibs_length_actual = d.members.length;
 		// console.log("bibs=" + bibs_length);
 		var document_array = [];
 		var uploaded_document_array = [];
@@ -1369,11 +1395,17 @@ function citationGenerator(id){
 		console.log("The dataset is " + dataset_opt);
 		if (dataset_opt !== "PubMedAPI" && dataset_opt !== "NewsAPI" && dataset_opt !== "PostgreSQL") {
 			// console.log("Not PubMedAPI or NewsAPI or PostgresSQL");
-			container.innerHTML =
-				'<h3 style="color:#4c6d92;opacity:0.75; padding:5px;">Clustered Publications</h3>' +
-				"\n<p>" +
-				bibs_list +
-				"</p>";
+			// container.innerHTML =
+			// 	'<h3 style="color:#4c6d92;opacity:0.75; padding:5px;">Clustered Publications (${bibs_length}) </h3>' +
+			// 	"\n<p>" +
+			// 	bibs_list +
+			// 	"</p>";
+			container.innerHTML = `
+				<h3 style="color:#4c6d92;opacity:0.75; padding:5px;">
+					Clustered Publications (${bibs_length_actual})
+				</h3>
+				<p>${bibs_list}</p>
+				`;
 			console.log(container);
 			console.log(d.bibs[j].abstract);
 		} 
@@ -1641,11 +1673,11 @@ function citationGenerator(id){
 	}
 
 	function contextMenu() {
-			 var height = 22,
+			 var height = 50,
 					 width = 110,
 					 margin = 0.1, // fraction of width
 					 items = [],
-					 rescale = false;
+					 rescale = true;
 
 	 function menu(x1, x2, y, circleId) {
 			 		closeMenuAndDocs();
@@ -1667,7 +1699,7 @@ function citationGenerator(id){
 							 .on('mouseout', function(){
 									 d3.select(this).select('rect').attr('style', 'fill: rgb(244,244,244); stroke: white; stroke-width: 1px') })
 							 .on('click', function(d, i){
-								 if (i == 1){
+								 if (i == 0){ // Changing for Tobii
 									 var text_id = "menu-text" + i.toString();
 									 var menu_text = document.getElementById(text_id).textContent;
 									 if (menu_text == 'Show Documents'){
@@ -3289,7 +3321,14 @@ $(document).ready(function() {
 	function checkGazeHoverTrigger() {
 		const element = document.elementFromPoint(currentX, currentY);
 
-		if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover") || (element && element.id === "zoom-in-button") || (element && element.id === "zoom-out-button") || (element && element.classList.contains("clustered-link"))) {
+		// if (element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover") || (element && element.id === "zoom-in-button") || (element && element.id === "zoom-out-button") || (element && element.classList.contains("clustered-link"))) {
+		if (
+			(element && element.tagName.toLowerCase() === "circle" && element.classList.contains("cover")) ||
+			(element && element.id === "zoom-in-button") ||
+			(element && element.id === "zoom-out-button") ||
+			(element && element.classList.contains("clustered-link")) ||
+			(element && element.classList.contains("menu-text"))  // <-- this is what you need
+		) {
 			if (element !== lastElement) {
 				// New element: reset hover timer
 				if (hoverTimeout) clearTimeout(hoverTimeout);
