@@ -1,9 +1,0 @@
-#!/bin/bash
-# modify the install commands to your need
-pip install flask-sqlalchemy
-pip install flask-migrate
-export FLASK_APP=plos_exp.py
-flask db init
-flask db migrate -m "users table"
-flask db upgrade 
-echo "after this step, you should be able to see file app/app.db with users table in it"

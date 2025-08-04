@@ -1,1 +1,0 @@
-2024-07-03 14:45:57,084 : INFO: Namespace(balance=False, cluster='document', clustering='maximin', fields='', input='data/inspec-corrected.tsv', matrix=None, mesh=None, mindf=1, n_clusters=10, p_docs=0.5, rank=5, sim=None, single=False, svd=0, theta=0.9, weight='tfidf')
